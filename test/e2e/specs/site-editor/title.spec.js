@@ -24,7 +24,7 @@ test.describe( 'Site editor title', () => {
 		} );
 		await siteEditor.enterEditMode();
 		const title = await page.locator(
-			'role=region[name="Editor top bar"i] >> role=heading[level=1]'
+			'role=region[name="Editor top bar"i] >> role=heading[level=2]'
 		);
 
 		await expect( title ).toHaveText( 'Editing template: Index' );
@@ -42,7 +42,7 @@ test.describe( 'Site editor title', () => {
 		} );
 		await siteEditor.enterEditMode();
 		const title = await page.locator(
-			'role=region[name="Editor top bar"i] >> role=heading[level=1]'
+			'role=region[name="Editor top bar"i] >> role=heading[level=2]'
 		);
 
 		await expect( title ).toHaveText( 'Editing template part: header' );
