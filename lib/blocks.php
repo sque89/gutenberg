@@ -24,6 +24,7 @@ function gutenberg_reregister_core_block_types() {
 				'comments',
 				'group',
 				'html',
+				'input-field',
 				'list',
 				'list-item',
 				'media-text',
