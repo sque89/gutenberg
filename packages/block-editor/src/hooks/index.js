@@ -21,6 +21,7 @@ import './content-lock-ui';
 import './metadata';
 import './metadata-name';
 
+export { AlignmentVisualizer } from './align';
 export { useCustomSides } from './dimensions';
 export { useLayoutClasses, useLayoutStyles } from './layout';
 export { getBorderClassesAndStyles, useBorderProps } from './use-border-props';
