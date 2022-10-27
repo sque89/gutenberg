@@ -30,7 +30,7 @@ import {
 	__experimentalImageEditor as ImageEditor,
 	__experimentalGetElementClassName,
 	__experimentalUseBorderProps as useBorderProps,
-	__experimentalAlignmentVisualizer as AlignmentVisualizer,
+	__experimentalBlockAlignmentVisualizer as BlockAlignmentVisualizer,
 } from '@wordpress/block-editor';
 import {
 	useEffect,
@@ -588,10 +588,9 @@ export default function Image( {
 		img = (
 			<>
 				{ isResizingImage && (
-					<AlignmentVisualizer
+					<BlockAlignmentVisualizer
 						clientId={ clientId }
 						allowedAlignments={ [ 'none', 'wide', 'full' ] }
-						value={ align }
 					/>
 				) }
 				<ResizableBox
