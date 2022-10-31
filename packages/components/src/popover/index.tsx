@@ -74,7 +74,7 @@ import { overlayMiddlewares } from './overlay-middlewares';
  *
  * @type {string}
  */
-const SLOT_NAME = 'Popover';
+const DEFAULT_SLOT_NAME = 'Popover';
 
 // An SVG displaying a triangle facing down, filled with a solid
 // color and bordered in such a way to create an arrow-like effect.
@@ -179,7 +179,7 @@ const UnforwardedPopover = (
 		anchor,
 		expandOnMobile,
 		onFocusOutside,
-		__unstableSlotName = SLOT_NAME,
+		__unstableSlotName,
 		flip = true,
 		resize = true,
 		shift = false,
@@ -325,7 +325,9 @@ const UnforwardedPopover = (
 	].filter(
 		( m: Middleware | undefined ): m is Middleware => m !== undefined
 	);
-	const slotName = useContext( slotNameContext ) || __unstableSlotName;
+
+	const contextSlotName = useContext( slotNameContext );
+	const slotName = __unstableSlotName ?? contextSlotName ?? DEFAULT_SLOT_NAME;
 	const slot = useSlot( slotName );
 
 	let onDialogClose;
@@ -601,7 +603,7 @@ const UnforwardedPopover = (
 export const Popover = forwardRef( UnforwardedPopover );
 
 function PopoverSlot(
-	{ name = SLOT_NAME }: { name?: string },
+	{ name = DEFAULT_SLOT_NAME }: { name?: string },
 	ref: ForwardedRef< any >
 ) {
 	return (
