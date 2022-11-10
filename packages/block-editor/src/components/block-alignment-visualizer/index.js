@@ -211,6 +211,7 @@ export default function BlockAlignmentVisualizer( {
 			focusOnMount={ false }
 			flip={ false }
 			resize={ false }
+			variant="unstyled"
 			__unstableInline
 		>
 			<Iframe
