@@ -54,32 +54,29 @@ function detectNearestZone( point, zones ) {
 
 export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
-	clientId,
+	blockListClientId,
+	focusedClientId,
 	showNearestAlignmentToCoords,
 } ) {
 	const layout = useLayout();
-	const { blockName, parentClientId, parentBlockName } = useSelect(
+	const { focusedBlockName, blockListBlockName } = useSelect(
 		( select ) => {
-			const { getBlockName, getBlockRootClientId } =
-				select( blockEditorStore );
-
-			const rootClientId = getBlockRootClientId( clientId );
+			const { getBlockName } = select( blockEditorStore );
 
 			return {
-				blockName: getBlockName( clientId ),
-				parentClientId: rootClientId,
-				parentBlockName: getBlockName( rootClientId ),
+				focusedBlockName: getBlockName( focusedClientId ),
+				blockListBlockName: getBlockName( blockListClientId ),
 			};
 		},
-		[ clientId ]
+		[ focusedClientId, blockListClientId ]
 	);
 
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
 	const [ coverElementStyle, setCoverElementStyle ] = useState( null );
 	const [ highlightedZone, setHighlightedZone ] = useState();
 	const zones = useRef( new Set() );
-	const blockElement = useBlockElement( clientId );
-	const parentBlockElement = useBlockElement( parentClientId );
+	const focusedBlockElement = useBlockElement( focusedClientId );
+	const blockListBlockElement = useBlockElement( blockListClientId );
 	const rootBlockListElement = useContext(
 		BlockList.__unstableElementContext
 	);
@@ -97,20 +94,23 @@ export default function BlockAlignmentVisualizer( {
 	}, [ showNearestAlignmentToCoords ] );
 
 	useEffect( () => {
-		const parentElement = parentBlockElement ?? rootBlockListElement;
-		if ( ! blockElement || ! parentElement ) {
+		const resolvedBlocklistElement =
+			blockListBlockElement ?? rootBlockListElement;
+		if ( ! focusedBlockElement || ! resolvedBlocklistElement ) {
 			return;
 		}
 
-		const { ownerDocument } = blockElement;
+		const { ownerDocument } = focusedBlockElement;
 		const { defaultView } = ownerDocument;
 
 		const update = () => {
 			setPopoverAnchor( {
 				ownerDocument,
 				getBoundingClientRect() {
-					const parentRect = parentElement.getBoundingClientRect();
-					const blockRect = blockElement.getBoundingClientRect();
+					const blockListRect =
+						resolvedBlocklistElement.getBoundingClientRect();
+					const focusedBlockRect =
+						focusedBlockElement.getBoundingClientRect();
 
 					// Produce a rect that has:
 					// - the horizontal positioning/height of the parent block.
@@ -118,43 +118,43 @@ export default function BlockAlignmentVisualizer( {
 					//
 					// These are the dimensions of our fake 'block list'.
 					return new defaultView.DOMRect(
-						parentRect.x,
-						blockRect.y,
-						parentRect.width,
-						blockRect.height
+						blockListRect.x,
+						focusedBlockRect.y,
+						blockListRect.width,
+						focusedBlockRect.height
 					);
 				},
 			} );
 
 			setCoverElementStyle( {
 				position: 'absolute',
-				width: parentElement.offsetWidth,
-				height: blockElement.offsetHeight,
+				width: resolvedBlocklistElement.offsetWidth,
+				height: focusedBlockElement.offsetHeight,
 			} );
 		};
 
 		const resizeObserver = defaultView.ResizeObserver
 			? new defaultView.ResizeObserver( update )
 			: undefined;
-		resizeObserver?.observe( parentElement );
-		resizeObserver?.observe( blockElement );
+		resizeObserver?.observe( resolvedBlocklistElement );
+		resizeObserver?.observe( focusedBlockElement );
 		update();
 
 		return () => {
 			resizeObserver?.disconnect();
 		};
-	}, [ blockElement, parentBlockElement, rootBlockListElement ] );
+	}, [ focusedBlockElement, blockListBlockElement, rootBlockListElement ] );
 
-	const blockAllowedAlignments = getValidAlignments(
-		getBlockSupport( blockName, 'align' ),
-		hasBlockSupport( blockName, 'alignWide', true )
+	const focusedBlockAllowedAlignments = getValidAlignments(
+		getBlockSupport( focusedBlockName, 'align' ),
+		hasBlockSupport( focusedBlockName, 'alignWide', true )
 	);
 
 	// Allow override of `blockAllowedAlignments`. The image block doesn't use
 	// alignment block supports, so this allows the image block to directly
 	// declare what it supports.
 	const availableAlignments = useAvailableAlignments(
-		allowedAlignments ?? blockAllowedAlignments
+		allowedAlignments ?? focusedBlockAllowedAlignments
 	);
 
 	const alignments = useMemo( () => {
@@ -186,14 +186,14 @@ export default function BlockAlignmentVisualizer( {
 	}, [ availableAlignments, layout ] );
 
 	const contrastColor = useMemo( () => {
-		if ( ! blockElement ) {
+		if ( ! focusedBlockElement ) {
 			return;
 		}
 
-		return blockElement.ownerDocument.defaultView
-			.getComputedStyle( blockElement )
+		return focusedBlockElement.ownerDocument.defaultView
+			.getComputedStyle( focusedBlockElement )
 			.getPropertyValue( 'color' );
-	}, [ blockElement ] );
+	}, [ focusedBlockElement ] );
 
 	const popoverRef = useRef();
 
@@ -259,7 +259,7 @@ export default function BlockAlignmentVisualizer( {
 						` }
 					</style>
 					<LayoutStyle
-						blockName={ parentBlockName }
+						blockName={ blockListBlockName }
 						layout={ layout }
 						selector=".block-editor__alignment-visualizer-zone"
 					/>

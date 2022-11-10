@@ -6,8 +6,12 @@ import { useState } from '@wordpress/element';
 /**
  * WordPress dependencies
  */
-import { __experimentalBlockAlignmentVisualizer as BlockAlignmentVisualizer } from '@wordpress/block-editor';
+import {
+	__experimentalBlockAlignmentVisualizer as BlockAlignmentVisualizer,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { ResizableBox } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import { isRTL } from '@wordpress/i18n';
 
 export default function ResizableImageControls( {
@@ -27,6 +31,13 @@ export default function ResizableImageControls( {
 	let showLeftHandle = false;
 	const [ isResizingImage, setIsResizingImage ] = useState( false );
 	const [ mousePosition, setMousePosition ] = useState();
+
+	const rootClientId = useSelect(
+		( select ) =>
+			select( blockEditorStore ).getBlockRootClientId( clientId )[
+				clientId
+			]
+	);
 
 	/* eslint-disable no-lonely-if */
 	// See https://github.com/WordPress/gutenberg/issues/7584.
@@ -58,7 +69,8 @@ export default function ResizableImageControls( {
 		<>
 			{ isResizingImage && (
 				<BlockAlignmentVisualizer
-					clientId={ clientId }
+					blockListClientId={ rootClientId }
+					focusedClientId={ clientId }
 					allowedAlignments={ [ 'none', 'wide', 'full' ] }
 					showNearestAlignmentToCoords={ mousePosition }
 				/>
