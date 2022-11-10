@@ -72,7 +72,7 @@ export default function ResizableImageControls( {
 					blockListClientId={ rootClientId }
 					focusedClientId={ clientId }
 					allowedAlignments={ [ 'none', 'wide', 'full' ] }
-					showNearestAlignmentToCoords={ mousePosition }
+					dragPosition={ mousePosition }
 				/>
 			) }
 			<ResizableBox

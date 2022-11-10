@@ -56,7 +56,7 @@ export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
 	blockListClientId,
 	focusedClientId,
-	showNearestAlignmentToCoords,
+	dragPosition,
 } ) {
 	const layout = useLayout();
 	const { focusedBlockName, blockListBlockName } = useSelect(
@@ -82,16 +82,16 @@ export default function BlockAlignmentVisualizer( {
 	);
 
 	useEffect( () => {
-		if ( showNearestAlignmentToCoords ) {
+		if ( dragPosition ) {
 			const nearestZone = detectNearestZone(
-				showNearestAlignmentToCoords,
+				dragPosition,
 				zones.current
 			);
 			if ( nearestZone?.name !== highlightedZone ) {
 				setHighlightedZone( nearestZone?.name );
 			}
 		}
-	}, [ showNearestAlignmentToCoords ] );
+	}, [ dragPosition ] );
 
 	useEffect( () => {
 		const resolvedBlocklistElement =
@@ -334,6 +334,8 @@ function BlockAlignmentVisualizerZone( {
 				placement="top-end"
 				variant="unstyled"
 				flip
+				resize={ false }
+				shift={ false }
 			>
 				<div
 					className={ classnames(
