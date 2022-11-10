@@ -211,7 +211,7 @@ export default function BlockAlignmentVisualizer( {
 			focusOnMount={ false }
 			flip={ false }
 			resize={ false }
-			__unstableSlotName=""
+			__unstableInline
 		>
 			<Iframe
 				style={ coverElementStyle }
