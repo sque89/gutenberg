@@ -55,12 +55,12 @@ function detectNearestZone( point, zones ) {
 
 export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
-	blockListClientId,
+	layoutClientId,
 	focusedClientId,
 	dragPosition,
 } ) {
 	const layout = useLayout();
-	const { focusedBlockName, blockListBlockName, blockListBlockAttributes } =
+	const { focusedBlockName, layoutBlockName, layoutBlockAttributes } =
 		useSelect(
 			( select ) => {
 				const { getBlockName, getBlockAttributes } =
@@ -68,12 +68,11 @@ export default function BlockAlignmentVisualizer( {
 
 				return {
 					focusedBlockName: getBlockName( focusedClientId ),
-					blockListBlockName: getBlockName( blockListClientId ),
-					blockListBlockAttributes:
-						getBlockAttributes( blockListClientId ),
+					layoutBlockName: getBlockName( layoutClientId ),
+					layoutBlockAttributes: getBlockAttributes( layoutClientId ),
 				};
 			},
-			[ focusedClientId, blockListClientId ]
+			[ focusedClientId, layoutClientId ]
 		);
 
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
@@ -81,7 +80,7 @@ export default function BlockAlignmentVisualizer( {
 	const [ highlightedZone, setHighlightedZone ] = useState();
 	const zones = useRef( new Set() );
 	const focusedBlockElement = useBlockElement( focusedClientId );
-	const blockListBlockElement = useBlockElement( blockListClientId );
+	const layoutBlockElement = useBlockElement( layoutClientId );
 	const rootBlockListElement = useContext(
 		BlockList.__unstableElementContext
 	);
@@ -98,14 +97,14 @@ export default function BlockAlignmentVisualizer( {
 		}
 	}, [ dragPosition ] );
 
-	const blockListSpacing = blockListBlockAttributes?.style?.spacing;
-	const blockListPadding = blockListSpacing?.padding;
-	const blockListMargin = blockListSpacing?.margin;
+	const layoutSpacing = layoutBlockAttributes?.style?.spacing;
+	const layoutPadding = layoutSpacing?.padding;
+	const layoutMargin = layoutSpacing?.margin;
 
 	useEffect( () => {
-		const resolvedBlocklistElement =
-			blockListBlockElement ?? rootBlockListElement;
-		if ( ! focusedBlockElement || ! resolvedBlocklistElement ) {
+		const resolvedLayoutElement =
+			layoutBlockElement ?? rootBlockListElement;
+		if ( ! focusedBlockElement || ! resolvedLayoutElement ) {
 			return;
 		}
 
@@ -116,8 +115,8 @@ export default function BlockAlignmentVisualizer( {
 			setPopoverAnchor( {
 				ownerDocument,
 				getBoundingClientRect() {
-					const blockListRect =
-						resolvedBlocklistElement.getBoundingClientRect();
+					const layoutRect =
+						resolvedLayoutElement.getBoundingClientRect();
 					const focusedBlockRect =
 						focusedBlockElement.getBoundingClientRect();
 
@@ -127,42 +126,42 @@ export default function BlockAlignmentVisualizer( {
 					//
 					// These are the dimensions of our fake 'block list'.
 					return new defaultView.DOMRect(
-						blockListRect.x,
+						layoutRect.x,
 						focusedBlockRect.y,
-						blockListRect.width,
+						layoutRect.width,
 						focusedBlockRect.height
 					);
 				},
 			} );
 
-			const paddingTop = blockListPadding?.top
-				? getSpacingPresetCssVar( blockListPadding?.top )
+			const paddingTop = layoutPadding?.top
+				? getSpacingPresetCssVar( layoutPadding?.top )
 				: 0;
-			const paddingRight = blockListPadding?.right
-				? getSpacingPresetCssVar( blockListPadding?.right )
+			const paddingRight = layoutPadding?.right
+				? getSpacingPresetCssVar( layoutPadding?.right )
 				: 0;
-			const paddingBottom = blockListPadding?.bottom
-				? getSpacingPresetCssVar( blockListPadding?.bottom )
+			const paddingBottom = layoutPadding?.bottom
+				? getSpacingPresetCssVar( layoutPadding?.bottom )
 				: 0;
-			const paddingLeft = blockListPadding?.left
-				? getSpacingPresetCssVar( blockListPadding?.left )
+			const paddingLeft = layoutPadding?.left
+				? getSpacingPresetCssVar( layoutPadding?.left )
 				: 0;
-			const marginTop = blockListMargin?.top
-				? getSpacingPresetCssVar( blockListMargin?.top )
+			const marginTop = layoutMargin?.top
+				? getSpacingPresetCssVar( layoutMargin?.top )
 				: 0;
-			const marginRight = blockListMargin?.right
-				? getSpacingPresetCssVar( blockListMargin?.right )
+			const marginRight = layoutMargin?.right
+				? getSpacingPresetCssVar( layoutMargin?.right )
 				: 0;
-			const marginBottom = blockListMargin?.bottom
-				? getSpacingPresetCssVar( blockListMargin?.bottom )
+			const marginBottom = layoutMargin?.bottom
+				? getSpacingPresetCssVar( layoutMargin?.bottom )
 				: 0;
-			const marginLeft = blockListMargin?.left
-				? getSpacingPresetCssVar( blockListMargin?.left )
+			const marginLeft = layoutMargin?.left
+				? getSpacingPresetCssVar( layoutMargin?.left )
 				: 0;
 
 			setCoverElementStyle( {
 				position: 'absolute',
-				width: resolvedBlocklistElement.offsetWidth,
+				width: resolvedLayoutElement.offsetWidth,
 				height: focusedBlockElement.offsetHeight,
 				paddingTop,
 				paddingRight,
@@ -178,7 +177,7 @@ export default function BlockAlignmentVisualizer( {
 		const resizeObserver = defaultView.ResizeObserver
 			? new defaultView.ResizeObserver( update )
 			: undefined;
-		resizeObserver?.observe( resolvedBlocklistElement );
+		resizeObserver?.observe( resolvedLayoutElement );
 		resizeObserver?.observe( focusedBlockElement );
 		update();
 
@@ -187,10 +186,10 @@ export default function BlockAlignmentVisualizer( {
 		};
 	}, [
 		focusedBlockElement,
-		blockListBlockElement,
+		layoutBlockElement,
 		rootBlockListElement,
-		blockListPadding,
-		blockListMargin,
+		layoutPadding,
+		layoutMargin,
 	] );
 
 	const focusedBlockAllowedAlignments = getValidAlignments(
@@ -307,7 +306,7 @@ export default function BlockAlignmentVisualizer( {
 						` }
 					</style>
 					<LayoutStyle
-						blockName={ blockListBlockName }
+						blockName={ layoutBlockName }
 						layout={ layout }
 						selector=".block-editor__alignment-visualizer-zone"
 					/>
