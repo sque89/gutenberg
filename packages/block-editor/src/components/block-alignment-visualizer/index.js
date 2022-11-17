@@ -99,7 +99,6 @@ export default function BlockAlignmentVisualizer( {
 
 	const layoutSpacing = layoutBlockAttributes?.style?.spacing;
 	const layoutPadding = layoutSpacing?.padding;
-	const layoutMargin = layoutSpacing?.margin;
 
 	useEffect( () => {
 		const resolvedLayoutElement =
@@ -134,43 +133,19 @@ export default function BlockAlignmentVisualizer( {
 				},
 			} );
 
-			const paddingTop = layoutPadding?.top
-				? getSpacingPresetCssVar( layoutPadding?.top )
-				: 0;
 			const paddingRight = layoutPadding?.right
 				? getSpacingPresetCssVar( layoutPadding?.right )
 				: 0;
-			const paddingBottom = layoutPadding?.bottom
-				? getSpacingPresetCssVar( layoutPadding?.bottom )
-				: 0;
 			const paddingLeft = layoutPadding?.left
 				? getSpacingPresetCssVar( layoutPadding?.left )
-				: 0;
-			const marginTop = layoutMargin?.top
-				? getSpacingPresetCssVar( layoutMargin?.top )
-				: 0;
-			const marginRight = layoutMargin?.right
-				? getSpacingPresetCssVar( layoutMargin?.right )
-				: 0;
-			const marginBottom = layoutMargin?.bottom
-				? getSpacingPresetCssVar( layoutMargin?.bottom )
-				: 0;
-			const marginLeft = layoutMargin?.left
-				? getSpacingPresetCssVar( layoutMargin?.left )
 				: 0;
 
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedLayoutElement.offsetWidth,
 				height: focusedBlockElement.offsetHeight,
-				paddingTop,
 				paddingRight,
-				paddingBottom,
 				paddingLeft,
-				marginTop,
-				marginRight,
-				marginBottom,
-				marginLeft,
 			} );
 		};
 
@@ -189,7 +164,6 @@ export default function BlockAlignmentVisualizer( {
 		layoutBlockElement,
 		rootBlockListElement,
 		layoutPadding,
-		layoutMargin,
 	] );
 
 	const focusedBlockAllowedAlignments = getValidAlignments(
