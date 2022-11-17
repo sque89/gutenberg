@@ -104,8 +104,7 @@ export default function BlockAlignmentVisualizer( {
 		}
 	}, [ dragPosition ] );
 
-	const layoutSpacing = layoutBlockAttributes?.style?.spacing;
-	const layoutPadding = layoutSpacing?.padding;
+	const layoutPadding = layoutBlockAttributes?.style?.spacing?.padding;
 
 	useEffect( () => {
 		const resolvedLayoutElement =
