@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
-import { useMergeRefs, useRefEffect } from '@wordpress/compose';
+import { throttle, useMergeRefs, useRefEffect } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	createPortal,
@@ -52,6 +52,7 @@ function detectNearestZone( point, zones ) {
 
 	return candidateZone;
 }
+const throttledDetectNearestZone = throttle( detectNearestZone, 100 );
 
 export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
@@ -87,7 +88,7 @@ export default function BlockAlignmentVisualizer( {
 
 	useEffect( () => {
 		if ( dragPosition ) {
-			const nearestZone = detectNearestZone(
+			const nearestZone = throttledDetectNearestZone(
 				dragPosition,
 				zones.current
 			);
