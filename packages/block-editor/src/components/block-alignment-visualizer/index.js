@@ -285,7 +285,7 @@ export default function BlockAlignmentVisualizer( {
 								bottom: 0;
 								left: 0;
 								background-color: var(--contrast-color);
-								opacity: 0.1;
+								opacity: 0.05;
 							}
 
 							.block-editor__alignment-visualizer-zone {
