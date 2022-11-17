@@ -210,7 +210,7 @@ export default function BlockAlignmentVisualizer( {
 				return null;
 			} )
 			.filter( ( alignment ) => alignment !== null );
-	}, [ availableAlignments, layout ] );
+	}, [ availableAlignments ] );
 
 	const contrastColor = useMemo( () => {
 		if ( ! focusedBlockElement ) {
