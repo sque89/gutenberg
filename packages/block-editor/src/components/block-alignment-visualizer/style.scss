@@ -3,8 +3,13 @@
 	z-index: 0;
 }
 
-.block-editor__alignment-visualizer-iframe {
-	overflow: hidden;
+.block-editor__alignment-visualizer-cover-element {
+	// Make the iframe fit its container using flexbox.
+	display: flex;
+
+	.block-editor__alignment-visualizer-iframe {
+		flex-grow: 1;
+	}
 }
 
 .block-editor__alignment-visualizer-zone-label {

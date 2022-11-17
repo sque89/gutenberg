@@ -236,13 +236,14 @@ export default function BlockAlignmentVisualizer( {
 			variant="unstyled"
 			__unstableInline
 		>
-			<Iframe
+			<div
+				className="block-editor__alignment-visualizer-cover-element"
 				style={ coverElementStyle }
-				className="block-editor__alignment-visualizer-iframe"
 			>
-				<head>
-					<style>
-						{ `
+				<Iframe className="block-editor__alignment-visualizer-iframe">
+					<head>
+						<style>
+							{ `
 							:root {
 								--contrast-color: ${ contrastColor }
 							}
@@ -279,29 +280,34 @@ export default function BlockAlignmentVisualizer( {
 								border-right: solid 2px var(--contrast-color);
 							}
 						` }
-					</style>
-					<LayoutStyle
-						blockName={ layoutBlockName }
-						layout={ layout }
-						selector=".block-editor__alignment-visualizer-zone"
-					/>
-				</head>
-				<body className="editor-styles-wrapper">
-					{ alignments.map( ( alignment ) => (
-						<BlockAlignmentVisualizerZone
-							key={ alignment.name }
-							alignment={ alignment }
-							justification={ layout.justifyContent }
-							color={ contrastColor }
-							isHighlighted={ alignment.name === highlightedZone }
-							addZone={ ( zone ) => zones.current.add( zone ) }
-							removeZone={ ( zone ) =>
-								zones.current.delete( zone )
-							}
+						</style>
+						<LayoutStyle
+							blockName={ layoutBlockName }
+							layout={ layout }
+							selector=".block-editor__alignment-visualizer-zone"
 						/>
-					) ) }
-				</body>
-			</Iframe>
+					</head>
+					<body className="editor-styles-wrapper">
+						{ alignments.map( ( alignment ) => (
+							<BlockAlignmentVisualizerZone
+								key={ alignment.name }
+								alignment={ alignment }
+								justification={ layout.justifyContent }
+								color={ contrastColor }
+								isHighlighted={
+									alignment.name === highlightedZone
+								}
+								addZone={ ( zone ) =>
+									zones.current.add( zone )
+								}
+								removeZone={ ( zone ) =>
+									zones.current.delete( zone )
+								}
+							/>
+						) ) }
+					</body>
+				</Iframe>
+			</div>
 		</Popover>
 	);
 }
