@@ -38,8 +38,14 @@ function detectNearestZone( point, zones ) {
 	let candidateDistance;
 
 	zones?.forEach( ( zone ) => {
+		const iframeElement =
+			zone.node?.ownerDocument?.defaultView?.frameElement;
+		const iframeRect = iframeElement?.getBoundingClientRect();
+		const offsetLeft = -( iframeRect?.left ?? 0 );
+		const offsetTop = -( iframeRect?.top ?? 0 );
+
 		const [ distance ] = getDistanceToNearestEdge(
-			point,
+			{ x: point.x + offsetLeft, y: point.y + offsetTop },
 			zone.node.getBoundingClientRect(),
 			highlightedZoneEdges
 		);
