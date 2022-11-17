@@ -27,6 +27,7 @@ import { BlockList } from '../';
 import { useLayout, LayoutStyle } from '../block-list/layout';
 import { __unstableUseBlockElement as useBlockElement } from '../block-list/use-block-props/use-block-refs';
 import useAvailableAlignments from '../block-alignment-control/use-available-alignments';
+import { getSpacingPresetCssVar } from '../spacing-sizes-control/utils';
 import { store as blockEditorStore } from '../../store';
 import { getValidAlignments } from '../../hooks/align';
 import { getDistanceToNearestEdge } from '../../utils/math';
@@ -59,17 +60,21 @@ export default function BlockAlignmentVisualizer( {
 	dragPosition,
 } ) {
 	const layout = useLayout();
-	const { focusedBlockName, blockListBlockName } = useSelect(
-		( select ) => {
-			const { getBlockName } = select( blockEditorStore );
+	const { focusedBlockName, blockListBlockName, blockListBlockAttributes } =
+		useSelect(
+			( select ) => {
+				const { getBlockName, getBlockAttributes } =
+					select( blockEditorStore );
 
-			return {
-				focusedBlockName: getBlockName( focusedClientId ),
-				blockListBlockName: getBlockName( blockListClientId ),
-			};
-		},
-		[ focusedClientId, blockListClientId ]
-	);
+				return {
+					focusedBlockName: getBlockName( focusedClientId ),
+					blockListBlockName: getBlockName( blockListClientId ),
+					blockListBlockAttributes:
+						getBlockAttributes( blockListClientId ),
+				};
+			},
+			[ focusedClientId, blockListClientId ]
+		);
 
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
 	const [ coverElementStyle, setCoverElementStyle ] = useState( null );
@@ -92,6 +97,10 @@ export default function BlockAlignmentVisualizer( {
 			}
 		}
 	}, [ dragPosition ] );
+
+	const blockListSpacing = blockListBlockAttributes?.style?.spacing;
+	const blockListPadding = blockListSpacing?.padding;
+	const blockListMargin = blockListSpacing?.margin;
 
 	useEffect( () => {
 		const resolvedBlocklistElement =
@@ -126,10 +135,43 @@ export default function BlockAlignmentVisualizer( {
 				},
 			} );
 
+			const paddingTop = blockListPadding?.top
+				? getSpacingPresetCssVar( blockListPadding?.top )
+				: 0;
+			const paddingRight = blockListPadding?.right
+				? getSpacingPresetCssVar( blockListPadding?.right )
+				: 0;
+			const paddingBottom = blockListPadding?.bottom
+				? getSpacingPresetCssVar( blockListPadding?.bottom )
+				: 0;
+			const paddingLeft = blockListPadding?.left
+				? getSpacingPresetCssVar( blockListPadding?.left )
+				: 0;
+			const marginTop = blockListMargin?.top
+				? getSpacingPresetCssVar( blockListMargin?.top )
+				: 0;
+			const marginRight = blockListMargin?.right
+				? getSpacingPresetCssVar( blockListMargin?.right )
+				: 0;
+			const marginBottom = blockListMargin?.bottom
+				? getSpacingPresetCssVar( blockListMargin?.bottom )
+				: 0;
+			const marginLeft = blockListMargin?.left
+				? getSpacingPresetCssVar( blockListMargin?.left )
+				: 0;
+
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedBlocklistElement.offsetWidth,
 				height: focusedBlockElement.offsetHeight,
+				paddingTop,
+				paddingRight,
+				paddingBottom,
+				paddingLeft,
+				marginTop,
+				marginRight,
+				marginBottom,
+				marginLeft,
 			} );
 		};
 
@@ -143,7 +185,13 @@ export default function BlockAlignmentVisualizer( {
 		return () => {
 			resizeObserver?.disconnect();
 		};
-	}, [ focusedBlockElement, blockListBlockElement, rootBlockListElement ] );
+	}, [
+		focusedBlockElement,
+		blockListBlockElement,
+		rootBlockListElement,
+		blockListPadding,
+		blockListMargin,
+	] );
 
 	const focusedBlockAllowedAlignments = getValidAlignments(
 		getBlockSupport( focusedBlockName, 'align' ),

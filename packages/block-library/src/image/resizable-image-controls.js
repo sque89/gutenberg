@@ -34,9 +34,8 @@ export default function ResizableImageControls( {
 
 	const rootClientId = useSelect(
 		( select ) =>
-			select( blockEditorStore ).getBlockRootClientId( clientId )[
-				clientId
-			]
+			select( blockEditorStore ).getBlockRootClientId( clientId ),
+		[ clientId ]
 	);
 
 	/* eslint-disable no-lonely-if */
