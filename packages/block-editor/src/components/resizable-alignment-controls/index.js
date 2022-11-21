@@ -7,10 +7,6 @@ import { useState } from '@wordpress/element';
  * WordPress dependencies
  */
 import {
-	__experimentalBlockAlignmentVisualizer as BlockAlignmentVisualizer,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
-import {
 	ResizableBox,
 	__unstableAnimatePresence as AnimatePresence,
 	__unstableMotion as motion,
@@ -18,8 +14,15 @@ import {
 import { useSelect } from '@wordpress/data';
 import { isRTL } from '@wordpress/i18n';
 
-export default function ResizableImageControls( {
+/**
+ * Internal dependencies
+ */
+import BlockAlignmentVisualizer from '../block-alignment-visualizer';
+import { store as blockEditorStore } from '../../store';
+
+export default function ResizableAlignmentControls( {
 	align,
+	allowedAlignments,
 	children,
 	clientId,
 	minWidth,
@@ -81,8 +84,8 @@ export default function ResizableImageControls( {
 						<BlockAlignmentVisualizer
 							blockListClientId={ rootClientId }
 							focusedClientId={ clientId }
-							allowedAlignments={ [ 'none', 'wide', 'full' ] }
 							dragPosition={ mousePosition }
+							allowedAlignments={ allowedAlignments }
 						/>
 					</motion.div>
 				) }

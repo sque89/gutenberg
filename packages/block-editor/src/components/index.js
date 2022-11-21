@@ -14,7 +14,6 @@ export {
 } from './block-alignment-control';
 export { default as __experimentalBlockFullHeightAligmentControl } from './block-full-height-alignment-control';
 export { default as __experimentalBlockAlignmentMatrixControl } from './block-alignment-matrix-control';
-export { default as __experimentalBlockAlignmentVisualizer } from './block-alignment-visualizer';
 export { default as BlockBreadcrumb } from './block-breadcrumb';
 export { default as __experimentalUseBlockOverlayActive } from './block-content-overlay';
 export { BlockContextProvider } from './block-context';
@@ -78,6 +77,7 @@ export { default as MediaUpload } from './media-upload';
 export { default as MediaUploadCheck } from './media-upload/check';
 export { default as PanelColorSettings } from './panel-color-settings';
 export { default as PlainText } from './plain-text';
+export { default as __experimentalResizableAlignmentControls } from './resizable-alignment-controls';
 export { default as __experimentalResponsiveBlockControl } from './responsive-block-control';
 export {
 	default as RichText,

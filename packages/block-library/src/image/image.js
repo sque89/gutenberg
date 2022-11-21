@@ -29,6 +29,7 @@ import {
 	__experimentalImageEditor as ImageEditor,
 	__experimentalGetElementClassName,
 	__experimentalUseBorderProps as useBorderProps,
+	__experimentalResizableAlignmentControls as ResizableAlignmentControls,
 } from '@wordpress/block-editor';
 import {
 	useEffect,
@@ -59,7 +60,6 @@ import { store as coreStore } from '@wordpress/core-data';
 import { createUpgradedEmbedBlock } from '../embed/util';
 import useClientWidth from './use-client-width';
 import { isExternalImage } from './edit';
-import ResizableImageControls from './resizable-image-controls';
 
 /**
  * Module constants
@@ -553,8 +553,9 @@ export default function Image( {
 		const maxWidthBuffer = maxWidth * 2.5;
 
 		img = (
-			<ResizableImageControls
+			<ResizableAlignmentControls
 				align={ align }
+				allowedAlignments={ [ 'none', 'wide', 'full' ] }
 				clientId={ clientId }
 				minWidth={ minWidth }
 				maxWidth={ maxWidthBuffer }
@@ -575,7 +576,7 @@ export default function Image( {
 				} }
 			>
 				{ img }
-			</ResizableImageControls>
+			</ResizableAlignmentControls>
 		);
 	}
 
