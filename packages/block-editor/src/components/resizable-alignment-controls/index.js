@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
@@ -49,8 +49,26 @@ function detectNearestZone( point, zones ) {
 }
 const throttledDetectNearestZone = throttle( detectNearestZone, 100 );
 
+function getSnapCoordinates( align, zones ) {
+	const snapCoordinates = [];
+	const alignedZone = zones.get( align );
+	const alignedZoneRect = alignedZone?.getBoundingClientRect();
+
+	zones?.forEach( ( node ) => {
+		// TODO - possibly this includes border, so may need to remove that.
+		const rect = node.getBoundingClientRect();
+
+		if ( align === 'center' ) {
+			snapCoordinates.push( rect.width );
+		} else if ( alignedZoneRect ) {
+			snapCoordinates.push( rect.right - alignedZoneRect.left );
+		}
+	} );
+	return snapCoordinates;
+}
+
 function ResizableAlignmentControls( {
-	align,
+	align = 'none',
 	allowedAlignments,
 	children,
 	clientId,
@@ -63,7 +81,8 @@ function ResizableAlignmentControls( {
 	onResizeStop,
 	size,
 } ) {
-	const [ isResizingImage, setIsResizingImage ] = useState( false );
+	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
+		useState( false );
 	const [ mousePosition, setMousePosition ] = useState();
 	const [ nearestZone, setNearestZone ] = useState();
 	const zones = useBlockAlignmentZoneContext();
@@ -79,6 +98,11 @@ function ResizableAlignmentControls( {
 			}
 		}
 	}, [ mousePosition, zones ] );
+
+	const snapCoordinates = useMemo(
+		() => getSnapCoordinates( align, zones ),
+		[ align, zones, zones.size ]
+	);
 
 	let showRightHandle = false;
 	let showLeftHandle = false;
@@ -118,7 +142,7 @@ function ResizableAlignmentControls( {
 	return (
 		<>
 			<AnimatePresence>
-				{ isResizingImage && (
+				{ isAlignmentVisualizerVisible && (
 					<motion.div
 						initial={ { opacity: 0 } }
 						animate={ { opacity: 1 } }
@@ -150,16 +174,28 @@ function ResizableAlignmentControls( {
 				} }
 				onResizeStart={ ( ...resizeArgs ) => {
 					onResizeStart( ...resizeArgs );
-					setIsResizingImage( true );
+					const [ , resizeDirection ] = resizeArgs;
+					// TODO - reconsider supported alignments.
+					// Wide and Full currently don't show drag handles, but could do.
+					// Left and Right alignments could also work, but are trickier to implement.
+					if (
+						[ 'none', 'center' ].includes( align ) &&
+						( resizeDirection === 'right' ||
+							resizeDirection === 'left' )
+					) {
+						setIsAlignmentVisualizerVisible( true );
+					}
 				} }
 				onResize={ ( event ) => {
 					setMousePosition( { x: event.clientX, y: event.clientY } );
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
 					onResizeStop( ...resizeArgs );
-					setIsResizingImage( false );
+					setIsAlignmentVisualizerVisible( false );
 				} }
 				resizeRatio={ align === 'center' ? 2 : 1 }
+				snap={ { x: snapCoordinates } }
+				snapGap={ 20 }
 			>
 				{ children }
 			</ResizableBox>
