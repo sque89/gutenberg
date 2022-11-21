@@ -7,7 +7,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
-import { Popover } from '@wordpress/components';
+import { Popover, __unstableMotion as motion } from '@wordpress/components';
 import { throttle, useMergeRefs, useRefEffect } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
@@ -370,15 +370,22 @@ function BlockAlignmentVisualizerZone( {
 				resize={ false }
 				shift={ false }
 			>
-				<div
+				<motion.div
 					className={ classnames(
 						'block-editor__alignment-visualizer-zone-label',
 						{ 'is-highlighted': isHighlighted }
 					) }
 					style={ { color } }
+					initial="inactive"
+					variants={ {
+						active: { opacity: 0.7 },
+						inactive: { opacity: 0 },
+					} }
+					animate={ isHighlighted ? 'active' : 'inactive' }
+					transition={ { duration: 0.2 } }
 				>
 					{ alignment.label }
-				</div>
+				</motion.div>
 			</Popover>
 		</>
 	);
