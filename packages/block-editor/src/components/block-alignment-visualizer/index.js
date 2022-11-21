@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
 import { Popover, __unstableMotion as motion } from '@wordpress/components';
-import { throttle, useMergeRefs, useRefEffect } from '@wordpress/compose';
+import { useMergeRefs, useRefEffect } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	createPortal,
@@ -30,41 +30,13 @@ import useAvailableAlignments from '../block-alignment-control/use-available-ali
 import { getSpacingPresetCssVar } from '../spacing-sizes-control/utils';
 import { store as blockEditorStore } from '../../store';
 import { getValidAlignments } from '../../hooks/align';
-import { getDistanceToNearestEdge } from '../../utils/math';
-
-const highlightedZoneEdges = [ 'right' ];
-function detectNearestZone( point, zones ) {
-	let candidateZone;
-	let candidateDistance;
-
-	zones?.forEach( ( zone ) => {
-		const iframeElement =
-			zone.node?.ownerDocument?.defaultView?.frameElement;
-		const iframeRect = iframeElement?.getBoundingClientRect();
-		const offsetLeft = -( iframeRect?.left ?? 0 );
-		const offsetTop = -( iframeRect?.top ?? 0 );
-
-		const [ distance ] = getDistanceToNearestEdge(
-			{ x: point.x + offsetLeft, y: point.y + offsetTop },
-			zone.node.getBoundingClientRect(),
-			highlightedZoneEdges
-		);
-
-		if ( ! candidateDistance || candidateDistance > distance ) {
-			candidateDistance = distance;
-			candidateZone = zone;
-		}
-	} );
-
-	return candidateZone;
-}
-const throttledDetectNearestZone = throttle( detectNearestZone, 100 );
+import { useBlockAlignmentZoneContext } from './zone-context';
 
 export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
 	layoutClientId,
 	focusedClientId,
-	dragPosition,
+	highlightedZone,
 } ) {
 	const layout = useLayout();
 	const { focusedBlockName, layoutBlockName, layoutBlockAttributes } =
@@ -84,25 +56,11 @@ export default function BlockAlignmentVisualizer( {
 
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
 	const [ coverElementStyle, setCoverElementStyle ] = useState( null );
-	const [ highlightedZone, setHighlightedZone ] = useState();
-	const zones = useRef( new Set() );
 	const focusedBlockElement = useBlockElement( focusedClientId );
 	const layoutBlockElement = useBlockElement( layoutClientId );
 	const rootBlockListElement = useContext(
 		BlockList.__unstableElementContext
 	);
-
-	useEffect( () => {
-		if ( dragPosition ) {
-			const nearestZone = throttledDetectNearestZone(
-				dragPosition,
-				zones.current
-			);
-			if ( nearestZone?.name !== highlightedZone ) {
-				setHighlightedZone( nearestZone?.name );
-			}
-		}
-	}, [ dragPosition ] );
 
 	const layoutPadding = layoutBlockAttributes?.style?.spacing?.padding;
 
@@ -302,12 +260,6 @@ export default function BlockAlignmentVisualizer( {
 								isHighlighted={
 									alignment.name === highlightedZone
 								}
-								addZone={ ( zone ) =>
-									zones.current.add( zone )
-								}
-								removeZone={ ( zone ) =>
-									zones.current.delete( zone )
-								}
 							/>
 						) ) }
 					</body>
@@ -322,22 +274,17 @@ function BlockAlignmentVisualizerZone( {
 	justification,
 	color,
 	isHighlighted,
-	addZone,
-	removeZone,
 } ) {
+	const zones = useBlockAlignmentZoneContext();
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
 	const { name } = alignment;
 
 	const updateZonesRef = useRefEffect(
 		( node ) => {
-			const zone = {
-				name,
-				node,
-			};
-			addZone( zone );
-			return () => removeZone( zone );
+			zones?.set( name, node );
+			return () => zones?.delete( name );
 		},
-		[ name ]
+		[ name, zones ]
 	);
 
 	const zoneInnerRefs = useMergeRefs( [ updateZonesRef, setPopoverAnchor ] );

@@ -1,26 +1,55 @@
 /**
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
-
-/**
- * WordPress dependencies
- */
 import {
 	ResizableBox,
 	__unstableAnimatePresence as AnimatePresence,
 	__unstableMotion as motion,
 } from '@wordpress/components';
+import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
+import { useEffect, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import BlockAlignmentVisualizer from '../block-alignment-visualizer';
+import {
+	BlockAlignmentZoneContextProvider,
+	useBlockAlignmentZoneContext,
+} from '../block-alignment-visualizer/zone-context';
 import { store as blockEditorStore } from '../../store';
+import { getDistanceToNearestEdge } from '../../utils/math';
 
-export default function ResizableAlignmentControls( {
+const highlightedZoneEdges = [ 'right' ];
+function detectNearestZone( point, zones ) {
+	let candidateZone;
+	let candidateDistance;
+
+	zones?.forEach( ( node, name ) => {
+		const iframeElement = node?.ownerDocument?.defaultView?.frameElement;
+		const iframeRect = iframeElement?.getBoundingClientRect();
+		const offsetLeft = -( iframeRect?.left ?? 0 );
+		const offsetTop = -( iframeRect?.top ?? 0 );
+
+		const [ distance ] = getDistanceToNearestEdge(
+			{ x: point.x + offsetLeft, y: point.y + offsetTop },
+			node.getBoundingClientRect(),
+			highlightedZoneEdges
+		);
+
+		if ( ! candidateDistance || candidateDistance > distance ) {
+			candidateDistance = distance;
+			candidateZone = name;
+		}
+	} );
+
+	return candidateZone;
+}
+const throttledDetectNearestZone = throttle( detectNearestZone, 100 );
+
+function ResizableAlignmentControls( {
 	align,
 	allowedAlignments,
 	children,
@@ -34,10 +63,25 @@ export default function ResizableAlignmentControls( {
 	onResizeStop,
 	size,
 } ) {
-	let showRightHandle = false;
-	let showLeftHandle = false;
 	const [ isResizingImage, setIsResizingImage ] = useState( false );
 	const [ mousePosition, setMousePosition ] = useState();
+	const [ nearestZone, setNearestZone ] = useState();
+	const zones = useBlockAlignmentZoneContext();
+
+	useEffect( () => {
+		if ( mousePosition ) {
+			const newNearestZone = throttledDetectNearestZone(
+				mousePosition,
+				zones
+			);
+			if ( newNearestZone !== nearestZone ) {
+				setNearestZone( newNearestZone );
+			}
+		}
+	}, [ mousePosition, zones ] );
+
+	let showRightHandle = false;
+	let showLeftHandle = false;
 
 	const rootClientId = useSelect(
 		( select ) =>
@@ -84,8 +128,8 @@ export default function ResizableAlignmentControls( {
 						<BlockAlignmentVisualizer
 							blockListClientId={ rootClientId }
 							focusedClientId={ clientId }
-							dragPosition={ mousePosition }
 							allowedAlignments={ allowedAlignments }
+							highlightedZone={ nearestZone }
 						/>
 					</motion.div>
 				) }
@@ -120,5 +164,15 @@ export default function ResizableAlignmentControls( {
 				{ children }
 			</ResizableBox>
 		</>
+	);
+}
+
+export default function ResizableAlignmentControlsWithZoneContext( {
+	...props
+} ) {
+	return (
+		<BlockAlignmentZoneContextProvider>
+			<ResizableAlignmentControls { ...props } />
+		</BlockAlignmentZoneContextProvider>
 	);
 }
