@@ -150,7 +150,7 @@ function ResizableAlignmentControls( {
 						transition={ { duration: 0.15 } }
 					>
 						<BlockAlignmentVisualizer
-							blockListClientId={ rootClientId }
+							layoutClientId={ rootClientId }
 							focusedClientId={ clientId }
 							allowedAlignments={ allowedAlignments }
 							highlightedZone={ nearestZone }
