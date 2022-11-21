@@ -378,7 +378,7 @@ function BlockAlignmentVisualizerZone( {
 					style={ { color } }
 					initial="inactive"
 					variants={ {
-						active: { opacity: 0.7 },
+						active: { opacity: 1 },
 						inactive: { opacity: 0 },
 					} }
 					animate={ isHighlighted ? 'active' : 'inactive' }
