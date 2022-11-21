@@ -10,7 +10,11 @@ import {
 	__experimentalBlockAlignmentVisualizer as BlockAlignmentVisualizer,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { ResizableBox } from '@wordpress/components';
+import {
+	ResizableBox,
+	__unstableAnimatePresence as AnimatePresence,
+	__unstableMotion as motion,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { isRTL } from '@wordpress/i18n';
 
@@ -66,14 +70,23 @@ export default function ResizableImageControls( {
 
 	return (
 		<>
-			{ isResizingImage && (
-				<BlockAlignmentVisualizer
-					blockListClientId={ rootClientId }
-					focusedClientId={ clientId }
-					allowedAlignments={ [ 'none', 'wide', 'full' ] }
-					dragPosition={ mousePosition }
-				/>
-			) }
+			<AnimatePresence>
+				{ isResizingImage && (
+					<motion.div
+						initial={ { opacity: 0 } }
+						animate={ { opacity: 1 } }
+						exit={ { opacity: 0 } }
+						transition={ { duration: 0.15 } }
+					>
+						<BlockAlignmentVisualizer
+							blockListClientId={ rootClientId }
+							focusedClientId={ clientId }
+							allowedAlignments={ [ 'none', 'wide', 'full' ] }
+							dragPosition={ mousePosition }
+						/>
+					</motion.div>
+				) }
+			</AnimatePresence>
 			<ResizableBox
 				size={ size }
 				showHandle={ showHandle }
