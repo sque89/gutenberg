@@ -51,8 +51,6 @@ function AngleCircle( {
 		// Prevent (drag) mouse events from selecting and accidentally
 		// triggering actions from other elements.
 		event.preventDefault();
-		// Input control needs to lose focus and by preventDefault above, it doesn't.
-		( event.target as HTMLDivElement | null )?.focus();
 
 		if (
 			angleCircleCenter.current !== undefined &&
@@ -99,7 +97,6 @@ function AngleCircle( {
 					value ? { transform: `rotate(${ value }deg)` } : undefined
 				}
 				className="components-angle-picker-control__angle-circle-indicator-wrapper"
-				tabIndex={ -1 }
 			>
 				<CircleIndicator className="components-angle-picker-control__angle-circle-indicator" />
 			</CircleIndicatorWrapper>
