@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
@@ -21,6 +21,8 @@ import {
 } from '../block-alignment-visualizer/zone-context';
 import { store as blockEditorStore } from '../../store';
 import { getDistanceToNearestEdge } from '../../utils/math';
+
+const SNAP_GAP = 20;
 
 const highlightedZoneEdges = [ 'right' ];
 function detectNearestZone( point, zones ) {
@@ -50,7 +52,7 @@ function detectNearestZone( point, zones ) {
 const throttledDetectNearestZone = throttle( detectNearestZone, 100 );
 
 function getSnapCoordinates( align, zones ) {
-	const snapCoordinates = [];
+	const snapWidths = [];
 	const alignedZone = zones.get( align );
 	const alignedZoneRect = alignedZone?.getBoundingClientRect();
 
@@ -59,13 +61,13 @@ function getSnapCoordinates( align, zones ) {
 		const rect = node.getBoundingClientRect();
 
 		if ( align === 'center' ) {
-			snapCoordinates.push( rect.width );
+			snapWidths.push( rect.width );
 		} else if ( alignedZoneRect ) {
-			snapCoordinates.push( rect.right - alignedZoneRect.left );
+			snapWidths.push( rect.right - alignedZoneRect.left );
 		}
 	} );
 
-	return snapCoordinates;
+	return snapWidths;
 }
 
 function ResizableAlignmentControls( {
@@ -86,8 +88,9 @@ function ResizableAlignmentControls( {
 		useState( false );
 	const [ nearestZone, setNearestZone ] = useState();
 	const zones = useBlockAlignmentZoneContext();
+	const isSnapped = useRef( false );
 
-	const snapCoordinates = useMemo(
+	const snapWidths = useMemo(
 		() => getSnapCoordinates( align, zones ),
 		[ align, zones, zones.size ]
 	);
@@ -174,7 +177,7 @@ function ResizableAlignmentControls( {
 						setIsAlignmentVisualizerVisible( true );
 					}
 				} }
-				onResize={ ( event ) => {
+				onResize={ ( event, resizeDirection, boxElement ) => {
 					const newNearestZone = throttledDetectNearestZone(
 						{ x: event.clientX, y: event.clientY },
 						zones
@@ -182,14 +185,21 @@ function ResizableAlignmentControls( {
 					if ( newNearestZone !== nearestZone ) {
 						setNearestZone( newNearestZone );
 					}
+
+					isSnapped.current =
+						isAlignmentVisualizerVisible &&
+						!! snapWidths?.some( ( width ) => {
+							const diff = width - boxElement.offsetWidth;
+							return diff > -SNAP_GAP && diff < SNAP_GAP;
+						} );
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
 					onResizeStop( ...resizeArgs );
 					setIsAlignmentVisualizerVisible( false );
 				} }
 				resizeRatio={ align === 'center' ? 2 : 1 }
-				snap={ { x: snapCoordinates } }
-				snapGap={ 20 }
+				snap={ { x: snapWidths } }
+				snapGap={ SNAP_GAP }
 			>
 				{ children }
 			</ResizableBox>
