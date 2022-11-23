@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
@@ -64,6 +64,7 @@ function getSnapCoordinates( align, zones ) {
 			snapCoordinates.push( rect.right - alignedZoneRect.left );
 		}
 	} );
+
 	return snapCoordinates;
 }
 
@@ -83,21 +84,8 @@ function ResizableAlignmentControls( {
 } ) {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
-	const [ mousePosition, setMousePosition ] = useState();
 	const [ nearestZone, setNearestZone ] = useState();
 	const zones = useBlockAlignmentZoneContext();
-
-	useEffect( () => {
-		if ( mousePosition ) {
-			const newNearestZone = throttledDetectNearestZone(
-				mousePosition,
-				zones
-			);
-			if ( newNearestZone !== nearestZone ) {
-				setNearestZone( newNearestZone );
-			}
-		}
-	}, [ mousePosition, zones ] );
 
 	const snapCoordinates = useMemo(
 		() => getSnapCoordinates( align, zones ),
@@ -187,7 +175,13 @@ function ResizableAlignmentControls( {
 					}
 				} }
 				onResize={ ( event ) => {
-					setMousePosition( { x: event.clientX, y: event.clientY } );
+					const newNearestZone = throttledDetectNearestZone(
+						{ x: event.clientX, y: event.clientY },
+						zones
+					);
+					if ( newNearestZone !== nearestZone ) {
+						setNearestZone( newNearestZone );
+					}
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
 					onResizeStop( ...resizeArgs );
