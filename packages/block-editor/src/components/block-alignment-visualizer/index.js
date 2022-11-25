@@ -15,7 +15,6 @@ import {
 	useContext,
 	useEffect,
 	useMemo,
-	useRef,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -32,13 +31,22 @@ import { store as blockEditorStore } from '../../store';
 import { getValidAlignments } from '../../hooks/align';
 import { useBlockAlignmentZoneContext } from './zone-context';
 
+/**
+ * A component that displays block alignment guidelines.
+ *
+ * @param {Object}      root0
+ * @param {?string[]}   root0.allowedAlignments    An optional array of alignments names. By default, the alignment support will be derived from the
+ *                                                 'focused' block's block supports, but some blocks (image) have an ad-hoc alignment implementation.
+ * @param {string|null} root0.layoutClientId       The client id of the block that provides the layout.
+ * @param {string}      root0.focusedClientId      The client id of the block to show the alignment guides for.
+ * @param {?string}     root0.highlightedAlignment The alignment name to show the label of.
+ */
 export default function BlockAlignmentVisualizer( {
 	allowedAlignments,
 	layoutClientId,
 	focusedClientId,
-	highlightedZone,
+	highlightedAlignment,
 } ) {
-	const layout = useLayout();
 	const { focusedBlockName, layoutBlockName, layoutBlockAttributes } =
 		useSelect(
 			( select ) => {
@@ -58,10 +66,14 @@ export default function BlockAlignmentVisualizer( {
 	const [ coverElementStyle, setCoverElementStyle ] = useState( null );
 	const focusedBlockElement = useBlockElement( focusedClientId );
 	const layoutBlockElement = useBlockElement( layoutClientId );
+
+	// useBlockElement is unable to return the document's root block list.
+	// __unsableElementContext seems to provide this.
 	const rootBlockListElement = useContext(
 		BlockList.__unstableElementContext
 	);
 
+	// TODO - this won't work for the root block list. For example - if the post template itself has padding.
 	const layoutPadding = layoutBlockAttributes?.style?.spacing?.padding;
 
 	useEffect( () => {
@@ -75,6 +87,8 @@ export default function BlockAlignmentVisualizer( {
 		const { defaultView } = ownerDocument;
 
 		const update = () => {
+			// The popover is positioned to the top of the block list that provides the layout
+			// and left of the 'focused' block.
 			setPopoverAnchor( {
 				ownerDocument,
 				getBoundingClientRect() {
@@ -83,11 +97,6 @@ export default function BlockAlignmentVisualizer( {
 					const focusedBlockRect =
 						focusedBlockElement.getBoundingClientRect();
 
-					// Produce a rect that has:
-					// - the horizontal positioning/height of the parent block.
-					// - the vertical positioning/height of the current block.
-					//
-					// These are the dimensions of our fake 'block list'.
 					return new defaultView.DOMRect(
 						layoutRect.x,
 						focusedBlockRect.y,
@@ -97,6 +106,7 @@ export default function BlockAlignmentVisualizer( {
 				},
 			} );
 
+			// Determine any padding in the layout.
 			const paddingRight = layoutPadding?.right
 				? getSpacingPresetCssVar( layoutPadding?.right )
 				: 0;
@@ -104,6 +114,8 @@ export default function BlockAlignmentVisualizer( {
 				? getSpacingPresetCssVar( layoutPadding?.left )
 				: 0;
 
+			// The cover element is an inner element within the popover. It has the width of the layout
+			// and height of the focused block, and also matches any padding of the layout.
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedLayoutElement.offsetWidth,
@@ -113,6 +125,7 @@ export default function BlockAlignmentVisualizer( {
 			} );
 		};
 
+		// Observe any resizes of both the layout and focused elements.
 		const resizeObserver = defaultView.ResizeObserver
 			? new defaultView.ResizeObserver( update )
 			: undefined;
@@ -130,6 +143,7 @@ export default function BlockAlignmentVisualizer( {
 		layoutPadding,
 	] );
 
+	// Get the allowed alignments of the focused block.
 	const focusedBlockAllowedAlignments = getValidAlignments(
 		getBlockSupport( focusedBlockName, 'align' ),
 		hasBlockSupport( focusedBlockName, 'alignWide', true )
@@ -142,6 +156,7 @@ export default function BlockAlignmentVisualizer( {
 		allowedAlignments ?? focusedBlockAllowedAlignments
 	);
 
+	// Produce an array of the alignments that is ultimately used to simulate block alignments.
 	const alignments = useMemo( () => {
 		return availableAlignments
 			.map( ( { name } ) => {
@@ -170,6 +185,8 @@ export default function BlockAlignmentVisualizer( {
 			.filter( ( alignment ) => alignment !== null );
 	}, [ availableAlignments ] );
 
+	// Get the current text color and use it as the basis of the color scheme for the visualizer.
+	// This should provide a good contrast with the background.
 	const contrastColor = useMemo( () => {
 		if ( ! focusedBlockElement ) {
 			return;
@@ -180,7 +197,8 @@ export default function BlockAlignmentVisualizer( {
 			.getPropertyValue( 'color' );
 	}, [ focusedBlockElement ] );
 
-	const popoverRef = useRef();
+	// Get the current layout, which is used for rendering `<LayoutStyle>`.
+	const layout = useLayout();
 
 	if ( availableAlignments?.length === 0 ) {
 		return null;
@@ -188,7 +206,6 @@ export default function BlockAlignmentVisualizer( {
 
 	return (
 		<Popover
-			ref={ popoverRef }
 			anchor={ popoverAnchor }
 			placement="top-start"
 			className="block-editor__alignment-visualizer"
@@ -258,7 +275,7 @@ export default function BlockAlignmentVisualizer( {
 								justification={ layout.justifyContent }
 								color={ contrastColor }
 								isHighlighted={
-									alignment.name === highlightedZone
+									alignment.name === highlightedAlignment
 								}
 							/>
 						) ) }
@@ -275,10 +292,12 @@ function BlockAlignmentVisualizerZone( {
 	color,
 	isHighlighted,
 } ) {
-	const zones = useBlockAlignmentZoneContext();
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
-	const { name } = alignment;
 
+	// Register alignment zone nodes to a React Context, which can then be used to determine alignment sizes.
+	// These are stored in a `Map`, which means they can be added and removed by their name.
+	const zones = useBlockAlignmentZoneContext();
+	const { name } = alignment;
 	const updateZonesRef = useRefEffect(
 		( node ) => {
 			zones?.set( name, node );
@@ -289,6 +308,10 @@ function BlockAlignmentVisualizerZone( {
 
 	const zoneInnerRefs = useMergeRefs( [ updateZonesRef, setPopoverAnchor ] );
 
+	// Each visualized alignment zone overlaps. The outer div element is absolutely positioned
+	// to the fill the entire space of the iframe. This represents a simulated block list and
+	// so has the content justification class name applied.
+	// The inner div element is the simulated block, it has the alignment class name applied.
 	return (
 		<>
 			<div
@@ -338,6 +361,11 @@ function BlockAlignmentVisualizerZone( {
 	);
 }
 
+/**
+ * A generic Iframe component. Used by the visualizer to ensure `<LayoutStyles>` don't leak into the public namespace.
+ *
+ * @param {import('@wordpress/element').WPElement} children
+ */
 function Iframe( { children, ...props } ) {
 	const [ iframeDocument, setIframeDocument ] = useState( null );
 

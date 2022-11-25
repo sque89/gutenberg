@@ -3,7 +3,7 @@
  */
 import { createContext, useContext, useRef } from '@wordpress/element';
 
-const BlockAlignmentZoneContext = createContext( new Set() );
+const BlockAlignmentZoneContext = createContext( new Map() );
 export const useBlockAlignmentZoneContext = () =>
 	useContext( BlockAlignmentZoneContext );
 
