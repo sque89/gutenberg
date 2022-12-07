@@ -222,6 +222,7 @@ export default function BlockAlignmentVisualizer( {
 			>
 				<Iframe
 					className="block-editor__alignment-visualizer-iframe"
+					title={ __( 'Alignment visualizer' ) }
 					headChildren={
 						<>
 							<style>
@@ -370,7 +371,7 @@ function BlockAlignmentVisualizerZone( {
  *
  * @param {import('@wordpress/element').WPElement} children
  */
-function Iframe( { children, headChildren, ...props } ) {
+function Iframe( { children, headChildren, title, ...props } ) {
 	const [ head, setHead ] = useState( null );
 	const [ body, setBody ] = useState( null );
 
@@ -401,7 +402,7 @@ function Iframe( { children, headChildren, ...props } ) {
 			ref={ ref }
 			// Correct doctype is required to enable rendering in standards mode
 			srcDoc="<!doctype html>"
-			title={ __( 'Alignment visualizer' ) }
+			title={ title }
 			{ ...props }
 		>
 			{ head && createPortal( headChildren, head ) }
