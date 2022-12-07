@@ -373,9 +373,8 @@ function Iframe( { children, ...props } ) {
 		function setDocumentIfReady() {
 			const contentDocument = node?.contentDocument;
 			const documentElement = contentDocument?.documentElement;
-			const readyState = contentDocument?.readyState;
 
-			if ( readyState !== 'interactive' && readyState !== 'complete' ) {
+			if ( ! contentDocument || ! documentElement ) {
 				return;
 			}
 
