@@ -220,54 +220,58 @@ export default function BlockAlignmentVisualizer( {
 				className="block-editor__alignment-visualizer-cover-element"
 				style={ coverElementStyle }
 			>
-				<Iframe className="block-editor__alignment-visualizer-iframe">
-					<head>
-						<style>
-							{ `
-							:root {
-								--contrast-color: ${ contrastColor }
-							}
+				<Iframe
+					className="block-editor__alignment-visualizer-iframe"
+					headChildren={
+						<>
+							<style>
+								{ `
+								:root {
+									--contrast-color: ${ contrastColor }
+								}
 
-							html {
-								overflow: hidden;
-							}
+								html {
+									overflow: hidden;
+								}
 
-							body::before {
-								content: "";
-								position: absolute;
-								top: 0;
-								right: 0;
-								bottom: 0;
-								left: 0;
-								background-color: var(--contrast-color);
-								opacity: 0.05;
-							}
+								body::before {
+									content: "";
+									position: absolute;
+									top: 0;
+									right: 0;
+									bottom: 0;
+									left: 0;
+									background-color: var(--contrast-color);
+									opacity: 0.05;
+								}
 
-							.block-editor__alignment-visualizer-zone {
-								position: absolute;
-								top: 0;
-								bottom: 0;
-								left: 0;
-								right: 0;
-							}
+								.block-editor__alignment-visualizer-zone {
+									position: absolute;
+									top: 0;
+									bottom: 0;
+									left: 0;
+									right: 0;
+								}
 
-							.block-editor__alignment-visualizer-zone-inner {
-								height: 100%;
-								max-width: 100%;
-								margin: 0 auto;
-								opacity: 0.7;
-								border-left: solid 2px var(--contrast-color);
-								border-right: solid 2px var(--contrast-color);
-							}
-						` }
-						</style>
-						<LayoutStyle
-							blockName={ layoutBlockName }
-							layout={ layout }
-							selector=".block-editor__alignment-visualizer-zone"
-						/>
-					</head>
-					<body className="editor-styles-wrapper">
+								.block-editor__alignment-visualizer-zone-inner {
+									height: 100%;
+									max-width: 100%;
+									margin: 0 auto;
+									opacity: 0.7;
+									border-left: solid 2px var(--contrast-color);
+									border-right: solid 2px var(--contrast-color);
+								}
+								` }
+							</style>
+							<LayoutStyle
+								blockName={ layoutBlockName }
+								layout={ layout }
+								selector=".block-editor__alignment-visualizer-zone"
+							/>
+						</>
+					}
+				>
+					<div className="editor-styles-wrapper">
 						{ alignments.map( ( alignment ) => (
 							<BlockAlignmentVisualizerZone
 								key={ alignment.name }
@@ -279,7 +283,7 @@ export default function BlockAlignmentVisualizer( {
 								}
 							/>
 						) ) }
-					</body>
+					</div>
 				</Iframe>
 			</div>
 		</Popover>
@@ -366,28 +370,29 @@ function BlockAlignmentVisualizerZone( {
  *
  * @param {import('@wordpress/element').WPElement} children
  */
-function Iframe( { children, ...props } ) {
-	const [ iframeDocument, setIframeDocument ] = useState( null );
+function Iframe( { children, headChildren, ...props } ) {
+	const [ head, setHead ] = useState( null );
+	const [ body, setBody ] = useState( null );
 
 	const ref = useRefEffect( ( node ) => {
-		function setDocumentIfReady() {
+		function setIframePortalElements() {
 			const contentDocument = node?.contentDocument;
-			const documentElement = contentDocument?.documentElement;
+			const headElement = contentDocument?.head;
+			const bodyElement = contentDocument?.body;
 
-			if ( ! contentDocument || ! documentElement ) {
+			if ( ! headElement || ! bodyElement ) {
 				return;
 			}
-
-			documentElement.removeChild( contentDocument.head );
-			documentElement.removeChild( contentDocument.body );
-			setIframeDocument( documentElement );
+			setHead( headElement );
+			setBody( bodyElement );
 		}
 
-		node.addEventListener( 'load', setDocumentIfReady );
+		node.addEventListener( 'load', setIframePortalElements );
 
 		return () => {
-			node.removeEventListener( 'load', setDocumentIfReady );
-			setIframeDocument( null );
+			node.removeEventListener( 'load', setIframePortalElements );
+			setHead( null );
+			setBody( null );
 		};
 	}, [] );
 
@@ -399,7 +404,8 @@ function Iframe( { children, ...props } ) {
 			title={ __( 'Alignment visualizer' ) }
 			{ ...props }
 		>
-			{ iframeDocument && createPortal( children, iframeDocument ) }
+			{ head && createPortal( headChildren, head ) }
+			{ body && createPortal( children, body ) }
 		</iframe>
 	);
 }
