@@ -255,6 +255,7 @@ export default function BlockAlignmentVisualizer( {
 								}
 
 								.block-editor__alignment-visualizer-zone-inner {
+									box-sizing: border-box;
 									height: 100%;
 									max-width: 100%;
 									margin: 0 auto;
@@ -299,16 +300,26 @@ function BlockAlignmentVisualizerZone( {
 } ) {
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
 
-	// Register alignment zone nodes to a React Context, which can then be used to determine alignment sizes.
-	// These are stored in a `Map`, which means they can be added and removed by their name.
+	// Register alignment zone rects to a React Context, which can then be used to determine alignment sizes.
 	const zones = useBlockAlignmentZoneContext();
 	const { name } = alignment;
 	const updateZonesRef = useRefEffect(
 		( node ) => {
-			zones?.set( name, node );
-			return () => zones?.delete( name );
+			const ownerDocument = node.ownerDocument;
+			const defaultView = ownerDocument.defaultView;
+			const resizeObserver = defaultView.ResizeObserver
+				? new defaultView.ResizeObserver( () => {
+						zones.set( name, node );
+				  } )
+				: undefined;
+			resizeObserver?.observe( node );
+
+			return () => {
+				zones?.delete( name );
+				resizeObserver.disconnect();
+			};
 		},
-		[ name, zones ]
+		[ name ]
 	);
 
 	const zoneInnerRefs = useMergeRefs( [ updateZonesRef, setPopoverAnchor ] );
