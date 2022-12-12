@@ -195,9 +195,8 @@ function ResizableAlignmentControls( {
 					// Wide and Full currently don't show drag handles, but could do.
 					// Left and Right alignments could also work, but are trickier to implement.
 					if (
-						[ 'none', 'center' ].includes( currentAlignment ) &&
-						( resizeDirection === 'right' ||
-							resizeDirection === 'left' )
+						resizeDirection === 'right' ||
+						resizeDirection === 'left'
 					) {
 						setIsAlignmentVisualizerVisible( true );
 					}
