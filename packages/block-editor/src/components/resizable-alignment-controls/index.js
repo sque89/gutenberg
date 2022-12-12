@@ -121,9 +121,10 @@ const throttledDetectSnapping = throttle( detectSnapping, 100 );
  * @param {number}                       props.maxWidth          Maximum width of the resizable box.
  * @param {number}                       props.minHeight         Minimum height of the resizable box.
  * @param {number}                       props.maxHeight         Maximum height of the resizable box.
- * @param {boolean}                      props.showHandle        Whether to show the drag handle.
  * @param {Function}                     props.onResizeStart     An event handler called when resizing starts.
  * @param {Function}                     props.onResizeStop      An event handler called when resizing stops.
+ * @param {Function}                     props.onSnap            Function called when alignment is set.
+ * @param {boolean}                      props.showHandle        Whether to show the drag handle.
  * @param {Object}                       props.size              The current dimensions.
  */
 function ResizableAlignmentControls( {
@@ -135,9 +136,10 @@ function ResizableAlignmentControls( {
 	maxWidth,
 	minHeight,
 	maxHeight,
-	showHandle,
 	onResizeStart,
 	onResizeStop,
+	onSnap,
+	showHandle,
 	size,
 } ) {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
@@ -212,7 +214,11 @@ function ResizableAlignmentControls( {
 					}
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
-					onResizeStop( ...resizeArgs );
+					if ( onSnap && snappedAlignment ) {
+						onSnap( snappedAlignment );
+					} else {
+						onResizeStop( ...resizeArgs );
+					}
 					setIsAlignmentVisualizerVisible( false );
 					setSnappedAlignment( null );
 				} }

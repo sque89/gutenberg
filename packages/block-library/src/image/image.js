@@ -590,6 +590,7 @@ export default function Image( {
 						height: parseInt( currentHeight + delta.height, 10 ),
 					} );
 				} }
+				onSnap={ updateAlignment }
 				showHandle={ isSelected }
 				size={ {
 					width: width ?? 'auto',
