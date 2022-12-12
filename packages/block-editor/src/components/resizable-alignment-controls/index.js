@@ -21,8 +21,33 @@ import {
 } from '../block-alignment-visualizer/zone-context';
 import { store as blockEditorStore } from '../../store';
 import { getDistanceFromPointToEdge } from '../../utils/math';
+import SnappedContent from './snapped-content';
 
 const SNAP_GAP = 20;
+
+function getVisibleHandles( alignment ) {
+	if ( alignment === 'center' ) {
+		// When the image is centered, show both handles.
+		return { right: true, left: true, bottom: true, top: false };
+	}
+
+	if ( isRTL() ) {
+		// In RTL mode the image is on the right by default.
+		// Show the right handle and hide the left handle only when it is
+		// aligned left. Otherwise always show the left handle.
+		if ( alignment === 'left' ) {
+			return { right: true, left: false, bottom: true, top: false };
+		}
+		return { left: true, right: false, bottom: true, top: false };
+	}
+
+	// Show the left handle and hide the right handle only when the
+	// image is aligned right. Otherwise always show the right handle.
+	if ( alignment === 'right' ) {
+		return { left: true, right: false, bottom: true, top: false };
+	}
+	return { right: true, left: false, bottom: true, top: false };
+}
 
 function getOffsetRect( rect, ownerDocument ) {
 	const frame = ownerDocument?.defaultView?.frameElement;
@@ -88,10 +113,10 @@ const throttledDetectSnapping = throttle( detectSnapping, 100 );
  * and configures snapping to block alignments.
  *
  * @param {Object}                       props
- * @param {?string}                      props.align             The current alignment name. Defaults to 'none'.
  * @param {?string[]}                    props.allowedAlignments An optional array of allowed alignments. If not provided this will be inferred from the block supports.
  * @param {import('react').ReactElement} props.children          Children of the ResizableBox.
  * @param {string}                       props.clientId          The clientId of the block
+ * @param {?string}                      props.currentAlignment  The current alignment name. Defaults to 'none'.
  * @param {number}                       props.minWidth          Minimum width of the resizable box.
  * @param {number}                       props.maxWidth          Maximum width of the resizable box.
  * @param {number}                       props.minHeight         Minimum height of the resizable box.
@@ -102,10 +127,10 @@ const throttledDetectSnapping = throttle( detectSnapping, 100 );
  * @param {Object}                       props.size              The current dimensions.
  */
 function ResizableAlignmentControls( {
-	align = 'none',
 	allowedAlignments,
 	children,
 	clientId,
+	currentAlignment = 'none',
 	minWidth,
 	maxWidth,
 	minHeight,
@@ -117,44 +142,14 @@ function ResizableAlignmentControls( {
 } ) {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
-	// Nearest alignment is currently used to determine when the alignment label is shown.
-	const [ snappedAlignment, setSnappedAlignment ] = useState();
+	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
 	const alignmentZones = useBlockAlignmentZoneContext();
-
-	let showRightHandle = false;
-	let showLeftHandle = false;
 
 	const rootClientId = useSelect(
 		( select ) =>
 			select( blockEditorStore ).getBlockRootClientId( clientId ),
 		[ clientId ]
 	);
-
-	/* eslint-disable no-lonely-if */
-	// See https://github.com/WordPress/gutenberg/issues/7584.
-	if ( align === 'center' ) {
-		// When the image is centered, show both handles.
-		showRightHandle = true;
-		showLeftHandle = true;
-	} else if ( isRTL() ) {
-		// In RTL mode the image is on the right by default.
-		// Show the right handle and hide the left handle only when it is
-		// aligned left. Otherwise always show the left handle.
-		if ( align === 'left' ) {
-			showRightHandle = true;
-		} else {
-			showLeftHandle = true;
-		}
-	} else {
-		// Show the left handle and hide the right handle only when the
-		// image is aligned right. Otherwise always show the right handle.
-		if ( align === 'right' ) {
-			showLeftHandle = true;
-		} else {
-			showRightHandle = true;
-		}
-	}
-	/* eslint-enable no-lonely-if */
 
 	return (
 		<>
@@ -175,6 +170,13 @@ function ResizableAlignmentControls( {
 					</motion.div>
 				) }
 			</AnimatePresence>
+			{ isAlignmentVisualizerVisible && (
+				<SnappedContent
+					alignmentZone={ alignmentZones.get( snappedAlignment ) }
+				>
+					{ children }
+				</SnappedContent>
+			) }
 			<ResizableBox
 				size={ size }
 				showHandle={ showHandle }
@@ -183,12 +185,7 @@ function ResizableAlignmentControls( {
 				minHeight={ minHeight }
 				maxHeight={ maxHeight }
 				lockAspectRatio
-				enable={ {
-					top: false,
-					right: showRightHandle,
-					bottom: true,
-					left: showLeftHandle,
-				} }
+				enable={ getVisibleHandles( currentAlignment ) }
 				onResizeStart={ ( ...resizeArgs ) => {
 					onResizeStart( ...resizeArgs );
 					const [ , resizeDirection ] = resizeArgs;
@@ -196,7 +193,7 @@ function ResizableAlignmentControls( {
 					// Wide and Full currently don't show drag handles, but could do.
 					// Left and Right alignments could also work, but are trickier to implement.
 					if (
-						[ 'none', 'center' ].includes( align ) &&
+						[ 'none', 'center' ].includes( currentAlignment ) &&
 						( resizeDirection === 'right' ||
 							resizeDirection === 'left' )
 					) {
@@ -217,10 +214,18 @@ function ResizableAlignmentControls( {
 				onResizeStop={ ( ...resizeArgs ) => {
 					onResizeStop( ...resizeArgs );
 					setIsAlignmentVisualizerVisible( false );
+					setSnappedAlignment( null );
 				} }
-				resizeRatio={ align === 'center' ? 2 : 1 }
+				resizeRatio={ currentAlignment === 'center' ? 2 : 1 }
 			>
-				{ children }
+				<div
+					style={ {
+						visibility: snappedAlignment ? 'hidden' : 'visible',
+						width: '100%',
+					} }
+				>
+					{ children }
+				</div>
 			</ResizableBox>
 		</>
 	);
