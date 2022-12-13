@@ -212,11 +212,12 @@ function ResizableAlignmentControls( {
 						setSnappedAlignment( newSnappedAlignment );
 					}
 				} }
-				onResizeStop={ ( ...resizeArgs ) => {
+				onResizeStop={ ( event, direction, element ) => {
 					if ( onSnap && snappedAlignment ) {
 						onSnap( snappedAlignment );
 					} else {
-						onResizeStop( ...resizeArgs );
+						const rect = element.getBoundingClientRect();
+						onResizeStop( rect.width, rect.height );
 					}
 					setIsAlignmentVisualizerVisible( false );
 					setSnappedAlignment( null );
