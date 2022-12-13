@@ -294,10 +294,11 @@ export default function Image( {
 		} );
 	}
 
-	function updateAlignment( nextAlign ) {
-		const extraUpdatedAttributes = [ 'wide', 'full' ].includes( nextAlign )
-			? { width: undefined, height: undefined }
-			: {};
+	function updateAlignment( nextAlign, { resetDimensions } = {} ) {
+		const extraUpdatedAttributes =
+			resetDimensions || [ 'wide', 'full' ].includes( nextAlign )
+				? { width: undefined, height: undefined }
+				: {};
 		setAttributes( {
 			...extraUpdatedAttributes,
 			align: nextAlign,
