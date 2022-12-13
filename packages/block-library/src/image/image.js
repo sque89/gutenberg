@@ -591,7 +591,12 @@ export default function Image( {
 						height: parseInt( currentHeight + delta.height, 10 ),
 					} );
 				} }
-				onSnap={ updateAlignment }
+				onSnap={ ( newAlignment ) => {
+					// When snapping, reset the image dimensions. This ensures
+					// when the image is set to align 'none', any custom dimensions
+					// are removed, and the image appears as content width.
+					updateAlignment( newAlignment, { resetDimensions: true } );
+				} }
 				showHandle={ isSelected }
 				size={ {
 					width: width ?? 'auto',

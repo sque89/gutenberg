@@ -214,14 +214,7 @@ function ResizableAlignmentControls( {
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
 					if ( onSnap && snappedAlignment ) {
-						// Force the image to go back to its default dimensions
-						// if the alignment is 'none'. Without this the image
-						// retains custom width and height value so won't snap.
-						const snapOptions =
-							snappedAlignment === 'none'
-								? { resetDimensions: true }
-								: undefined;
-						onSnap( snappedAlignment, snapOptions );
+						onSnap( snappedAlignment );
 					} else {
 						onResizeStop( ...resizeArgs );
 					}
