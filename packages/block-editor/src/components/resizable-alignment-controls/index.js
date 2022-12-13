@@ -23,7 +23,7 @@ import { store as blockEditorStore } from '../../store';
 import { getDistanceFromPointToEdge } from '../../utils/math';
 import SnappedContent from './snapped-content';
 
-const SNAP_GAP = 20;
+const SNAP_GAP = 30;
 
 function getVisibleHandles( alignment ) {
 	if ( alignment === 'center' ) {
