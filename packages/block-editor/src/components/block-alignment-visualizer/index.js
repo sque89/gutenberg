@@ -12,6 +12,7 @@ import { useMergeRefs, useRefEffect } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	createPortal,
+	forwardRef,
 	useContext,
 	useEffect,
 	useMemo,
@@ -34,19 +35,25 @@ import { useBlockAlignmentZoneContext } from './zone-context';
 /**
  * A component that displays block alignment guidelines.
  *
- * @param {Object}      root0
- * @param {?string[]}   root0.allowedAlignments    An optional array of alignments names. By default, the alignment support will be derived from the
- *                                                 'focused' block's block supports, but some blocks (image) have an ad-hoc alignment implementation.
- * @param {string|null} root0.layoutClientId       The client id of the block that provides the layout.
- * @param {string}      root0.focusedClientId      The client id of the block to show the alignment guides for.
- * @param {?string}     root0.highlightedAlignment The alignment name to show the label of.
+ * @param {Object}                       props
+ * @param {?string[]}                    props.allowedAlignments    An optional array of alignments names. By default, the alignment support will be derived from the
+ *                                                                  'focused' block's block supports, but some blocks (image) have an ad-hoc alignment implementation.
+ * @param {import('react').ReactElement} props.children
+ * @param {string|null}                  props.layoutClientId       The client id of the block that provides the layout.
+ * @param {string}                       props.focusedClientId      The client id of the block to show the alignment guides for.
+ * @param {?string}                      props.highlightedAlignment The alignment name to show the label of.
+ * @param {import('react').Ref}          ref
  */
-export default function BlockAlignmentVisualizer( {
-	allowedAlignments,
-	layoutClientId,
-	focusedClientId,
-	highlightedAlignment,
-} ) {
+function BlockAlignmentVisualizer(
+	{
+		allowedAlignments,
+		children,
+		layoutClientId,
+		focusedClientId,
+		highlightedAlignment,
+	},
+	ref
+) {
 	const { focusedBlockName, layoutBlockName, layoutBlockAttributes } =
 		useSelect(
 			( select ) => {
@@ -206,6 +213,7 @@ export default function BlockAlignmentVisualizer( {
 
 	return (
 		<Popover
+			ref={ ref }
 			anchor={ popoverAnchor }
 			placement="top-start"
 			className="block-editor__alignment-visualizer"
@@ -288,9 +296,12 @@ export default function BlockAlignmentVisualizer( {
 					</div>
 				</Iframe>
 			</div>
+			{ children }
 		</Popover>
 	);
 }
+
+export default forwardRef( BlockAlignmentVisualizer );
 
 function BlockAlignmentVisualizerZone( {
 	alignment,
