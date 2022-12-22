@@ -15,10 +15,9 @@ import { useCallback, useMemo } from '@wordpress/element';
  */
 import transformStyles from '../../utils/transform-styles';
 
-const EDITOR_STYLES_SELECTOR = '.editor-styles-wrapper';
 extend( [ namesPlugin, a11yPlugin ] );
 
-function useDarkThemeBodyClassName( styles ) {
+function useDarkThemeBodyClassName( styles, scope ) {
 	return useCallback(
 		( node ) => {
 			if ( ! node ) {
@@ -27,9 +26,7 @@ function useDarkThemeBodyClassName( styles ) {
 
 			const { ownerDocument } = node;
 			const { defaultView, body } = ownerDocument;
-			const canvas = ownerDocument.querySelector(
-				EDITOR_STYLES_SELECTOR
-			);
+			const canvas = scope ? ownerDocument.querySelector( scope ) : body;
 
 			let backgroundColor;
 
@@ -66,9 +63,9 @@ function useDarkThemeBodyClassName( styles ) {
 	);
 }
 
-export default function EditorStyles( { styles } ) {
+export default function EditorStyles( { styles, scope } ) {
 	const transformedStyles = useMemo(
-		() => transformStyles( styles, EDITOR_STYLES_SELECTOR ),
+		() => transformStyles( styles, scope ),
 		[ styles ]
 	);
 
@@ -76,7 +73,7 @@ export default function EditorStyles( { styles } ) {
 		<>
 			{ /* Use an empty style element to have a document reference,
 			     but this could be any element. */ }
-			<style ref={ useDarkThemeBodyClassName( styles ) } />
+			<style ref={ useDarkThemeBodyClassName( styles, scope ) } />
 			{ transformedStyles.map( ( css, index ) => (
 				<style key={ index }>{ css }</style>
 			) ) }
