@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * WordPress dependencies
@@ -32,13 +31,7 @@ import { mergeBaseAndUserConfigs } from './global-styles-provider';
 import { GlobalStylesContext } from './context';
 import StylesPreview from './preview';
 import ScreenHeader from './header';
-
-function compareVariations( a, b ) {
-	return (
-		fastDeepEqual( a.styles, b.styles ) &&
-		fastDeepEqual( a.settings, b.settings )
-	);
-}
+import { isGlobalStyleConfigEqual } from './utils';
 
 function Variation( { variation } ) {
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -72,7 +65,7 @@ function Variation( { variation } ) {
 	};
 
 	const isActive = useMemo( () => {
-		return compareVariations( user, variation );
+		return isGlobalStyleConfigEqual( user, variation );
 	}, [ user, variation ] );
 
 	return (
