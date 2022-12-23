@@ -26,6 +26,7 @@ import { NavigationButtonAsItem } from './navigation-button';
 import ContextMenu from './context-menu';
 import StylesPreview from './preview';
 import { GlobalStylesContext } from './context';
+import { MINIMUM_REVISION_COUNT } from './screen-revisions';
 
 function ScreenRoot() {
 	const { userConfigRevisionsCount: revisionsCount } =
@@ -135,7 +136,7 @@ function ScreenRoot() {
 				</>
 			) }
 
-			{ revisionsCount > 0 ? (
+			{ revisionsCount >= MINIMUM_REVISION_COUNT ? (
 				<>
 					<CardDivider />
 					<CardBody>
