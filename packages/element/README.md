@@ -205,6 +205,10 @@ _Related_
 
 -   <https://reactjs.org/docs/react-dom-client.html#createroot>
 
+### EnvironmentContext
+
+Undocumented declaration.
+
 ### findDOMNode
 
 Finds the dom node of a React component.
