@@ -17,7 +17,11 @@ import { createUser, deleteAllUsers } from './users';
 import { setupRest, rest, getMaxBatchSize, batchRest } from './rest';
 import { getPluginsMap, activatePlugin, deactivatePlugin } from './plugins';
 import { deleteAllTemplates } from './templates';
-import { activateTheme } from './themes';
+import {
+	activateTheme,
+	getCurrentThemeGlobalStylesPostId,
+	getThemeGlobalStylesRevisions,
+} from './themes';
 import { deleteAllBlocks } from './blocks';
 import { createComment, deleteAllComments } from './comments';
 import { createPost, deleteAllPosts } from './posts';
@@ -122,9 +126,12 @@ class RequestUtils {
 	activatePlugin = activatePlugin.bind( this );
 	deactivatePlugin = deactivatePlugin.bind( this );
 	activateTheme = activateTheme.bind( this );
+	getCurrentThemeGlobalStylesPostId =
+		getCurrentThemeGlobalStylesPostId.bind( this );
 	deleteAllBlocks = deleteAllBlocks;
 	createPost = createPost.bind( this );
 	deleteAllPosts = deleteAllPosts.bind( this );
+	getThemeGlobalStylesRevisions = getThemeGlobalStylesRevisions.bind( this );
 	createComment = createComment.bind( this );
 	deleteAllComments = deleteAllComments.bind( this );
 	deleteAllWidgets = deleteAllWidgets.bind( this );
