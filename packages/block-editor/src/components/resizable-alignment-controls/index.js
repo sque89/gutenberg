@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
@@ -145,32 +145,13 @@ function ResizableAlignmentControls( {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
 	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
-	const [ showNaturalContent, setShowNaturalContent ] = useState( true );
 	const alignmentZones = useBlockAlignmentZoneContext();
-	const resizableBoxRef = useRef();
-	const alignmentVisualizerRef = useRef();
 
 	const rootClientId = useSelect(
 		( select ) =>
 			select( blockEditorStore ).getBlockRootClientId( clientId ),
 		[ clientId ]
 	);
-
-	useEffect( () => {
-		let timeoutId = null;
-		if ( ! snappedAlignment ) {
-			// Show the 'natural' content only after the animation has completed.
-			// This is not a great way to do it, but suffices for demoing the animation.
-			timeoutId = setTimeout( () => setShowNaturalContent( true ), 90 );
-		}
-
-		return () => {
-			if ( timeoutId ) {
-				clearTimeout( timeoutId );
-				timeoutId = null;
-			}
-		};
-	}, [ isAlignmentVisualizerVisible, snappedAlignment ] );
 
 	return (
 		<>
@@ -183,27 +164,21 @@ function ResizableAlignmentControls( {
 						transition={ { duration: 0.15 } }
 					>
 						<BlockAlignmentVisualizer
-							ref={ alignmentVisualizerRef }
 							layoutClientId={ rootClientId }
 							focusedClientId={ clientId }
 							allowedAlignments={ allowedAlignments }
 							highlightedAlignment={ snappedAlignment }
-						>
-							<SnappedContent
-								alignmentVisualizerRef={
-									alignmentVisualizerRef
-								}
-								alignmentZone={ alignmentZones.get(
-									snappedAlignment
-								) }
-								resizableBoxRef={ resizableBoxRef }
-							>
-								{ children }
-							</SnappedContent>
-						</BlockAlignmentVisualizer>
+						/>
 					</motion.div>
 				) }
 			</AnimatePresence>
+			{ isAlignmentVisualizerVisible && (
+				<SnappedContent
+					alignmentZone={ alignmentZones.get( snappedAlignment ) }
+				>
+					{ children }
+				</SnappedContent>
+			) }
 			<ResizableBox
 				size={ size }
 				showHandle={ showHandle }
@@ -227,10 +202,6 @@ function ResizableAlignmentControls( {
 					}
 				} }
 				onResize={ ( event, resizeDirection, resizableElement ) => {
-					if ( resizableBoxRef.current !== resizableElement ) {
-						resizableBoxRef.current = resizableElement;
-					}
-
 					// Detect if snapping is happening.
 					const newSnappedAlignment = throttledDetectSnapping(
 						resizableElement,
@@ -239,7 +210,6 @@ function ResizableAlignmentControls( {
 					);
 					if ( newSnappedAlignment !== snappedAlignment ) {
 						setSnappedAlignment( newSnappedAlignment );
-						setShowNaturalContent( false );
 					}
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
@@ -250,13 +220,12 @@ function ResizableAlignmentControls( {
 					}
 					setIsAlignmentVisualizerVisible( false );
 					setSnappedAlignment( null );
-					setShowNaturalContent( true );
 				} }
 				resizeRatio={ currentAlignment === 'center' ? 2 : 1 }
 			>
 				<div
 					style={ {
-						visibility: showNaturalContent ? 'visible' : 'hidden',
+						visibility: snappedAlignment ? 'hidden' : 'visible',
 						width: '100%',
 					} }
 				>

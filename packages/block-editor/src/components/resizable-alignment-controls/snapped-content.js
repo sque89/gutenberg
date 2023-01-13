@@ -1,106 +1,52 @@
 /**
  * WordPress dependencies
  */
-import { __unstableMotion as motion } from '@wordpress/components';
+import { Popover } from '@wordpress/components';
 import { useLayoutEffect, useState } from '@wordpress/element';
 
-function getOffsetRect( element, offsetElement ) {
-	const rect = element.getBoundingClientRect();
-	const offsetRect = offsetElement.getBoundingClientRect();
-	// const frame = ownerDocument?.defaultView?.frameElement;
-	// const frameRect = frame?.getBoundingClientRect();
-
-	return new window.DOMRect(
-		rect.x - ( offsetRect?.x ?? 0 ),
-		rect.y - ( offsetRect?.y ?? 0 ),
-		rect.width,
-		rect.height
-	);
-}
-
-export default function SnappedContent( {
-	alignmentVisualizerRef,
-	alignmentZone,
-	children,
-	resizableBoxRef,
-} ) {
-	const [ animationProps, setAnimationProps ] = useState( {} );
-	const [ anchor, setAnchor ] = useState( null );
+export default function SnappedContent( { alignmentZone, children } ) {
+	const [ snapStyle, setSnapStyle ] = useState( null );
 
 	useLayoutEffect( () => {
-		if ( ! resizableBoxRef.current || ! alignmentVisualizerRef.current ) {
-			return;
-		}
-
-		const resizableBoxRect = getOffsetRect(
-			resizableBoxRef.current,
-			alignmentVisualizerRef.current
-		);
-
 		if ( ! alignmentZone ) {
-			// When unsnapping, animate the image back to the resizable box's position,
-			// and then set it as 'hidden'.
-			setAnimationProps( {
-				animate: {
-					x: resizableBoxRect.x,
-					y: 0,
-					width: resizableBoxRect.width,
-					height: resizableBoxRect.height,
-					transitionEnd: {
-						visibility: 'hidden',
-					},
-				},
-				transition: { duration: 0.1 },
-			} );
-			return;
+			return setSnapStyle( { visibility: 'hidden' } );
 		}
 
-		if ( ! anchor ) {
-			setAnchor( {
-				getBoundingClientRect: () =>
-					alignmentZone.parentElement.getBoundingClientRect(),
-				ownerDocument: alignmentZone.ownerDocument,
+		const ownerDocument = alignmentZone.ownerDocument;
+		const defaultView = ownerDocument.defaultView;
+
+		function update() {
+			const rect = alignmentZone.getBoundingClientRect();
+
+			setSnapStyle( {
+				position: 'absolute',
+				width: rect.width,
+				height: 'auto',
 			} );
 		}
 
-		const alignmentZoneRect = alignmentZone.getBoundingClientRect();
-		const aspectRatio = resizableBoxRect.width / resizableBoxRect.height;
+		const resizeObserver = defaultView.ResizeObserver
+			? new defaultView.ResizeObserver( update )
+			: undefined;
+		resizeObserver?.observe( alignmentZone );
 
-		// When snapping, first move the image immediately to the resizable box's current position,
-		// making it visible.
-		setAnimationProps( {
-			animate: {
-				visibility: 'visible',
-				x: resizableBoxRect.x,
-				y: 0,
-				width: resizableBoxRect.width,
-				height: resizableBoxRect.height,
-			},
-			transition: { duration: 0 },
-		} );
-
-		// Then using `requestAnimationFrame` to defer the animation, animate to the alignment zone's
-		// position.
-		window.requestAnimationFrame( () => {
-			setAnimationProps( {
-				animate: {
-					visibility: 'visible',
-					x: alignmentZoneRect.x,
-					y: 0,
-					width: alignmentZoneRect.width,
-					height: alignmentZoneRect.width / aspectRatio,
-				},
-				transition: { duration: 0.1 },
-			} );
-		} );
+		return () => {
+			resizeObserver?.disconnect();
+		};
 	}, [ alignmentZone ] );
 
 	return (
-		<motion.div
-			style={ { position: 'absolute', visibility: 'hidden' } }
-			{ ...animationProps }
+		<Popover
+			anchor={ alignmentZone }
+			placement="top-start"
+			animate={ false }
+			focusOnMount={ false }
+			flip={ false }
+			resize={ false }
+			variant="unstyled"
+			__unstableInline
 		>
-			{ children }
-		</motion.div>
+			<div style={ snapStyle }>{ children }</div>
+		</Popover>
 	);
 }
