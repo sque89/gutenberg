@@ -16,9 +16,9 @@ import { isRTL } from '@wordpress/i18n';
  */
 import BlockAlignmentVisualizer from '../block-alignment-visualizer';
 import {
-	BlockAlignmentZoneContextProvider,
-	useBlockAlignmentZoneContext,
-} from '../block-alignment-visualizer/zone-context';
+	BlockAlignmentGuideContextProvider,
+	useBlockAlignmentGuides,
+} from '../block-alignment-visualizer/guide-context';
 import { store as blockEditorStore } from '../../store';
 import { getDistanceFromPointToEdge } from '../../utils/math';
 
@@ -66,9 +66,9 @@ function getOffsetRect( element ) {
  *
  * @param {Node}           resizableElement The element being resized.
  * @param {'left'|'right'} resizeDirection  The direction being resized.
- * @param {Map}            alignmentZones   A Map of alignment zone nodes.
+ * @param {Map}            alignmentGuides  A Map of alignment zone nodes.
  */
-function detectSnapping( resizableElement, resizeDirection, alignmentZones ) {
+function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 	const offsetResizableRect = getOffsetRect( resizableElement );
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
@@ -81,7 +81,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentZones ) {
 	let candidateZone;
 
 	// Loop through alignment zone nodes.
-	alignmentZones?.forEach( ( zone, name ) => {
+	alignmentGuides?.forEach( ( zone, name ) => {
 		const offsetZoneRect = getOffsetRect( zone );
 
 		// Calculate the distance from the resizeable element's edge to the
@@ -140,7 +140,7 @@ function ResizableAlignmentControls( {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
 	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
-	const alignmentZones = useBlockAlignmentZoneContext();
+	const alignmentGuides = useBlockAlignmentGuides();
 
 	const rootClientId = useSelect(
 		( select ) =>
@@ -155,7 +155,7 @@ function ResizableAlignmentControls( {
 		}
 
 		// Calculate the correct positioning to overlay the element over the alignment zone when snapping.
-		const snappedZone = alignmentZones.get( snappedAlignment );
+		const snappedZone = alignmentGuides.get( snappedAlignment );
 		const zoneRect = getOffsetRect( snappedZone );
 		const contentRect = resizableRef.current.getBoundingClientRect();
 
@@ -165,7 +165,7 @@ function ResizableAlignmentControls( {
 			top: zoneRect.top - contentRect.top,
 			width: zoneRect.width,
 		};
-	}, [ snappedAlignment, alignmentZones ] );
+	}, [ snappedAlignment, alignmentGuides ] );
 
 	return (
 		<>
@@ -203,9 +203,6 @@ function ResizableAlignmentControls( {
 					// This seems to be the only way to get a ref to the element.
 					resizableRef.current = resizeElement;
 
-					// TODO - reconsider supported alignments.
-					// Wide and Full currently don't show drag handles, but could do.
-					// Left and Right alignments could also work, but are trickier to implement.
 					if (
 						resizeDirection === 'right' ||
 						resizeDirection === 'left'
@@ -218,7 +215,7 @@ function ResizableAlignmentControls( {
 					const newSnappedAlignment = throttledDetectSnapping(
 						resizableElement,
 						resizeDirection,
-						alignmentZones
+						alignmentGuides
 					);
 					if ( newSnappedAlignment !== snappedAlignment ) {
 						setSnappedAlignment( newSnappedAlignment );
@@ -251,8 +248,8 @@ export default function ResizableAlignmentControlsWithZoneContext( {
 	...props
 } ) {
 	return (
-		<BlockAlignmentZoneContextProvider>
+		<BlockAlignmentGuideContextProvider>
 			<ResizableAlignmentControls { ...props } />
-		</BlockAlignmentZoneContextProvider>
+		</BlockAlignmentGuideContextProvider>
 	);
 }
