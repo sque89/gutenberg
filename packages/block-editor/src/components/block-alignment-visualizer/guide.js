@@ -60,18 +60,9 @@ export default function BlockAlignmentVisualizerGuide( {
 	const { name } = alignment;
 	const updateGuideContext = useRefEffect(
 		( node ) => {
-			const ownerDocument = node.ownerDocument;
-			const defaultView = ownerDocument.defaultView;
-			const resizeObserver = defaultView.ResizeObserver
-				? new defaultView.ResizeObserver( () => {
-						guides.set( name, node );
-				  } )
-				: undefined;
-			resizeObserver?.observe( node );
-
+			guides?.set( name, node );
 			return () => {
 				guides?.delete( name );
-				resizeObserver.disconnect();
 			};
 		},
 		[ name ]
