@@ -83,6 +83,7 @@ export default function BlockAlignmentVisualizer( {
 		<LayoutPopover
 			layoutClientId={ layoutClientId }
 			focusedClientId={ focusedClientId }
+			hasLayoutPadding={ layout.type !== 'constrained' }
 		>
 			<Iframe
 				className="block-editor__alignment-visualizer-iframe"

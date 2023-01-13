@@ -10,9 +10,16 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 import { BlockList } from '../';
 import { __unstableUseBlockElement as useBlockElement } from '../block-list/use-block-props/use-block-refs';
 
+function getComputedCSS( element, property ) {
+	return element.ownerDocument.defaultView
+		.getComputedStyle( element )
+		.getPropertyValue( property );
+}
+
 export default function LayoutPopover( {
 	layoutClientId,
 	focusedClientId,
+	hasLayoutPadding,
 	children,
 } ) {
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
@@ -58,10 +65,18 @@ export default function LayoutPopover( {
 
 			// The cover element is an inner element within the popover. It has the width of the layout
 			// and height of the focused block, and also matches any padding of the layout.
+			const paddingLeft = hasLayoutPadding
+				? getComputedCSS( resolvedLayoutElement, 'padding-left' )
+				: 0;
+			const paddingRight = hasLayoutPadding
+				? getComputedCSS( resolvedLayoutElement, 'padding-right' )
+				: 0;
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedLayoutElement.offsetWidth,
 				height: focusedBlockElement.offsetHeight,
+				paddingLeft,
+				paddingRight,
 			} );
 		};
 
@@ -76,7 +91,12 @@ export default function LayoutPopover( {
 		return () => {
 			resizeObserver?.disconnect();
 		};
-	}, [ focusedBlockElement, layoutBlockElement, rootBlockListElement ] );
+	}, [
+		focusedBlockElement,
+		layoutBlockElement,
+		rootBlockListElement,
+		hasLayoutPadding,
+	] );
 
 	return (
 		<Popover
