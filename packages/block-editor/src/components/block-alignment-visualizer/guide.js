@@ -6,6 +6,8 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
+
+import { __ } from '@wordpress/i18n';
 import { Popover, __unstableMotion as motion } from '@wordpress/components';
 import { useMergeRefs, useRefEffect } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
@@ -14,6 +16,20 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useBlockAlignmentGuides } from './guide-context';
+
+const ALIGNMENTS = {
+	none: {
+		label: __( 'Content width' ),
+	},
+	wide: {
+		label: __( 'Wide width' ),
+		className: 'alignwide',
+	},
+	full: {
+		label: __( 'Full width' ),
+		className: 'alignfull',
+	},
+};
 
 // Because the guide elements are within an iframe, styles can't be
 // declared in a scss file, those styles are defined here to co-locate
@@ -57,15 +73,14 @@ export default function BlockAlignmentVisualizerGuide( {
 
 	// Register alignment guide elements to a React Context, which can then be used to determine snapping.
 	const guides = useBlockAlignmentGuides();
-	const { name } = alignment;
 	const updateGuideContext = useRefEffect(
 		( node ) => {
-			guides?.set( name, node );
+			guides?.set( alignment, node );
 			return () => {
-				guides?.delete( name );
+				guides?.delete( alignment );
 			};
 		},
-		[ name ]
+		[ alignment ]
 	);
 
 	const guideRef = useMergeRefs( [ updateGuideContext, setPopoverAnchor ] );
@@ -86,7 +101,7 @@ export default function BlockAlignmentVisualizerGuide( {
 				<div
 					className={ classnames(
 						'block-editor-alignment-visualizer-guide',
-						alignment.className
+						ALIGNMENTS[ alignment ].className
 					) }
 					ref={ guideRef }
 				/>
@@ -114,7 +129,7 @@ export default function BlockAlignmentVisualizerGuide( {
 					animate={ isHighlighted ? 'active' : 'inactive' }
 					transition={ { duration: 0.2 } }
 				>
-					{ alignment.label }
+					{ ALIGNMENTS[ alignment ].label }
 				</motion.div>
 			</Popover>
 		</>

@@ -2,9 +2,8 @@
  * WordPress dependencies
  */
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
-import { Popover } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useContext, useEffect, useMemo, useState } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -12,11 +11,10 @@ import { __ } from '@wordpress/i18n';
  */
 import Iframe from './iframe';
 import BlockAlignmentVisualizerGuide, { guideIframeStyles } from './guide';
-import { BlockList } from '../';
+import LayoutPopover from './layout-popover';
 import { useLayout, LayoutStyle } from '../block-list/layout';
 import { __unstableUseBlockElement as useBlockElement } from '../block-list/use-block-props/use-block-refs';
 import useAvailableAlignments from '../block-alignment-control/use-available-alignments';
-import { getSpacingPresetCssVar } from '../spacing-sizes-control/utils';
 import { store as blockEditorStore } from '../../store';
 import { getValidAlignments } from '../../hooks/align';
 
@@ -36,143 +34,31 @@ export default function BlockAlignmentVisualizer( {
 	focusedClientId,
 	highlightedAlignment,
 } ) {
-	const { focusedBlockName, layoutBlockName, layoutBlockAttributes } =
-		useSelect(
-			( select ) => {
-				const { getBlockName, getBlockAttributes } =
-					select( blockEditorStore );
+	const { focusedBlockName, layoutBlockName } = useSelect(
+		( select ) => {
+			const { getBlockName } = select( blockEditorStore );
 
-				return {
-					focusedBlockName: getBlockName( focusedClientId ),
-					layoutBlockName: getBlockName( layoutClientId ),
-					layoutBlockAttributes: getBlockAttributes( layoutClientId ),
-				};
-			},
-			[ focusedClientId, layoutClientId ]
+			return {
+				focusedBlockName: getBlockName( focusedClientId ),
+				layoutBlockName: getBlockName( layoutClientId ),
+			};
+		},
+		[ focusedClientId, layoutClientId ]
+	);
+
+	const focusedBlockElement = useBlockElement( focusedClientId );
+
+	// Get the valid alignments of the focused block, or use the supplied `allowedAlignments`,
+	// which allows this to work for blocks like 'image' that don't use block supports.
+	const validAlignments =
+		allowedAlignments ??
+		getValidAlignments(
+			getBlockSupport( focusedBlockName, 'align' ),
+			hasBlockSupport( focusedBlockName, 'alignWide', true )
 		);
 
-	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
-	const [ coverElementStyle, setCoverElementStyle ] = useState( null );
-	const focusedBlockElement = useBlockElement( focusedClientId );
-	const layoutBlockElement = useBlockElement( layoutClientId );
-
-	// useBlockElement is unable to return the document's root block list.
-	// __unstableElementContext seems to provide this.
-	const rootBlockListElement = useContext(
-		BlockList.__unstableElementContext
-	);
-
-	// TODO - this won't work for the root block list. For example - if the post template itself has padding.
-	const layoutPadding = layoutBlockAttributes?.style?.spacing?.padding;
-
-	useEffect( () => {
-		const resolvedLayoutElement =
-			layoutBlockElement ?? rootBlockListElement;
-		if ( ! focusedBlockElement || ! resolvedLayoutElement ) {
-			return;
-		}
-
-		const { ownerDocument } = focusedBlockElement;
-		const { defaultView } = ownerDocument;
-
-		const update = () => {
-			// The popover is positioned to the top of the block list that provides the layout
-			// and left of the 'focused' block.
-			setPopoverAnchor( {
-				ownerDocument,
-				getBoundingClientRect() {
-					const layoutRect =
-						resolvedLayoutElement.getBoundingClientRect();
-					const focusedBlockRect =
-						focusedBlockElement.getBoundingClientRect();
-
-					return new defaultView.DOMRect(
-						layoutRect.x,
-						focusedBlockRect.y,
-						layoutRect.width,
-						focusedBlockRect.height
-					);
-				},
-			} );
-
-			// Determine any padding in the layout.
-			const paddingRight = layoutPadding?.right
-				? getSpacingPresetCssVar( layoutPadding?.right )
-				: 0;
-			const paddingLeft = layoutPadding?.left
-				? getSpacingPresetCssVar( layoutPadding?.left )
-				: 0;
-
-			// The cover element is an inner element within the popover. It has the width of the layout
-			// and height of the focused block, and also matches any padding of the layout.
-			setCoverElementStyle( {
-				position: 'absolute',
-				width: resolvedLayoutElement.offsetWidth,
-				height: focusedBlockElement.offsetHeight,
-				paddingRight,
-				paddingLeft,
-			} );
-		};
-
-		// Observe any resizes of both the layout and focused elements.
-		const resizeObserver = defaultView.ResizeObserver
-			? new defaultView.ResizeObserver( update )
-			: undefined;
-		resizeObserver?.observe( resolvedLayoutElement );
-		resizeObserver?.observe( focusedBlockElement );
-		update();
-
-		return () => {
-			resizeObserver?.disconnect();
-		};
-	}, [
-		focusedBlockElement,
-		layoutBlockElement,
-		rootBlockListElement,
-		layoutPadding,
-	] );
-
-	// Get the allowed alignments of the focused block.
-	const focusedBlockAllowedAlignments = getValidAlignments(
-		getBlockSupport( focusedBlockName, 'align' ),
-		hasBlockSupport( focusedBlockName, 'alignWide', true )
-	);
-
-	// Allow override of `blockAllowedAlignments`. The image block doesn't use
-	// alignment block supports, so this allows the image block to directly
-	// declare what it supports.
-	const availableAlignments = useAvailableAlignments(
-		allowedAlignments ?? focusedBlockAllowedAlignments
-	);
-
-	// Produce an array of the alignments that is ultimately used to simulate block alignments.
-	const alignments = useMemo( () => {
-		return availableAlignments
-			.map( ( { name } ) => {
-				if ( name === 'none' ) {
-					return {
-						name,
-						label: __( 'Content width' ),
-					};
-				}
-				if ( name === 'wide' ) {
-					return {
-						name,
-						label: __( 'Wide width' ),
-						className: 'alignwide',
-					};
-				}
-				if ( name === 'full' ) {
-					return {
-						name,
-						label: __( 'Full width' ),
-						className: 'alignfull',
-					};
-				}
-				return null;
-			} )
-			.filter( ( alignment ) => alignment !== null );
-	}, [ availableAlignments ] );
+	// Filter the alignments down to those supported by the layout.
+	const availableAlignments = useAvailableAlignments( validAlignments );
 
 	// Get the current text color and use it as the basis of the color scheme for the visualizer.
 	// This should provide a good contrast with the background.
@@ -194,28 +80,17 @@ export default function BlockAlignmentVisualizer( {
 	}
 
 	return (
-		<Popover
-			anchor={ popoverAnchor }
-			placement="top-start"
-			className="block-editor__alignment-visualizer"
-			animate={ false }
-			focusOnMount={ false }
-			flip={ false }
-			resize={ false }
-			variant="unstyled"
-			__unstableInline
+		<LayoutPopover
+			layoutClientId={ layoutClientId }
+			focusedClientId={ focusedClientId }
 		>
-			<div
-				className="block-editor__alignment-visualizer-cover-element"
-				style={ coverElementStyle }
-			>
-				<Iframe
-					className="block-editor__alignment-visualizer-iframe"
-					title={ __( 'Alignment visualizer' ) }
-					headChildren={
-						<>
-							<style>
-								{ `
+			<Iframe
+				className="block-editor__alignment-visualizer-iframe"
+				title={ __( 'Alignment visualizer' ) }
+				headChildren={
+					<>
+						<style>
+							{ `
 								:root {
 									--contrast-color: ${ contrastColor }
 								}
@@ -236,31 +111,28 @@ export default function BlockAlignmentVisualizer( {
 								}
 
 								${ guideIframeStyles }
-								` }
-							</style>
-							<LayoutStyle
-								blockName={ layoutBlockName }
-								layout={ layout }
-								selector=".block-editor-alignment-visualizer-guide__layout"
-							/>
-						</>
-					}
-				>
-					<div className="editor-styles-wrapper">
-						{ alignments.map( ( alignment ) => (
-							<BlockAlignmentVisualizerGuide
-								key={ alignment.name }
-								alignment={ alignment }
-								justification={ layout.justifyContent }
-								color={ contrastColor }
-								isHighlighted={
-									alignment.name === highlightedAlignment
-								}
-							/>
-						) ) }
-					</div>
-				</Iframe>
-			</div>
-		</Popover>
+							` }
+						</style>
+						<LayoutStyle
+							blockName={ layoutBlockName }
+							layout={ layout }
+							selector=".block-editor-alignment-visualizer-guide__layout"
+						/>
+					</>
+				}
+			>
+				<div className="editor-styles-wrapper">
+					{ availableAlignments.map( ( { name } ) => (
+						<BlockAlignmentVisualizerGuide
+							key={ name }
+							alignment={ name }
+							justification={ layout.justifyContent }
+							color={ contrastColor }
+							isHighlighted={ name === highlightedAlignment }
+						/>
+					) ) }
+				</div>
+			</Iframe>
+		</LayoutPopover>
 	);
 }
