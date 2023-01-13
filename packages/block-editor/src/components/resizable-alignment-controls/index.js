@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
 /**
@@ -21,7 +21,6 @@ import {
 } from '../block-alignment-visualizer/zone-context';
 import { store as blockEditorStore } from '../../store';
 import { getDistanceFromPointToEdge } from '../../utils/math';
-import SnappedContent from './snapped-content';
 
 const SNAP_GAP = 30;
 
@@ -49,15 +48,16 @@ function getVisibleHandles( alignment ) {
 	return { right: true, left: false, bottom: true, top: false };
 }
 
-function getOffsetRect( rect, ownerDocument ) {
-	const frame = ownerDocument?.defaultView?.frameElement;
+function getOffsetRect( element ) {
+	const frame = element?.ownerDocument?.defaultView?.frameElement;
 	const frameRect = frame?.getBoundingClientRect();
+	const elementRect = element?.getBoundingClientRect();
 
 	return new window.DOMRect(
-		rect.x + ( frameRect?.left ?? 0 ),
-		rect.y + ( frameRect?.top ?? 0 ),
-		rect.width,
-		rect.height
+		elementRect.x + ( frameRect?.left ?? 0 ),
+		elementRect.y + ( frameRect?.top ?? 0 ),
+		elementRect.width,
+		elementRect.height
 	);
 }
 
@@ -69,10 +69,7 @@ function getOffsetRect( rect, ownerDocument ) {
  * @param {Map}            alignmentZones   A Map of alignment zone nodes.
  */
 function detectSnapping( resizableElement, resizeDirection, alignmentZones ) {
-	const offsetResizableRect = getOffsetRect(
-		resizableElement.getBoundingClientRect(),
-		resizableElement.ownerDocument
-	);
+	const offsetResizableRect = getOffsetRect( resizableElement );
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
 	// - Caveat: this assumes horizontal resizing.
@@ -85,10 +82,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentZones ) {
 
 	// Loop through alignment zone nodes.
 	alignmentZones?.forEach( ( zone, name ) => {
-		const offsetZoneRect = getOffsetRect(
-			zone.getBoundingClientRect(),
-			zone.ownerDocument
-		);
+		const offsetZoneRect = getOffsetRect( zone );
 
 		// Calculate the distance from the resizeable element's edge to the
 		// alignment zone's edge.
@@ -142,6 +136,7 @@ function ResizableAlignmentControls( {
 	showHandle,
 	size,
 } ) {
+	const resizableRef = useRef();
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
 	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
@@ -152,6 +147,25 @@ function ResizableAlignmentControls( {
 			select( blockEditorStore ).getBlockRootClientId( clientId ),
 		[ clientId ]
 	);
+
+	const contentStyle = useMemo( () => {
+		if ( ! snappedAlignment ) {
+			// By default the content takes up the full width of the resizable box.
+			return { width: '100%' };
+		}
+
+		// Calculate the correct positioning to overlay the element over the alignment zone when snapping.
+		const snappedZone = alignmentZones.get( snappedAlignment );
+		const zoneRect = getOffsetRect( snappedZone );
+		const contentRect = resizableRef.current.getBoundingClientRect();
+
+		return {
+			position: 'absolute',
+			left: zoneRect.left - contentRect.left,
+			top: zoneRect.top - contentRect.top,
+			width: zoneRect.width,
+		};
+	}, [ snappedAlignment, alignmentZones ] );
 
 	return (
 		<>
@@ -172,13 +186,6 @@ function ResizableAlignmentControls( {
 					</motion.div>
 				) }
 			</AnimatePresence>
-			{ isAlignmentVisualizerVisible && (
-				<SnappedContent
-					alignmentZone={ alignmentZones.get( snappedAlignment ) }
-				>
-					{ children }
-				</SnappedContent>
-			) }
 			<ResizableBox
 				size={ size }
 				showHandle={ showHandle }
@@ -190,7 +197,12 @@ function ResizableAlignmentControls( {
 				enable={ getVisibleHandles( currentAlignment ) }
 				onResizeStart={ ( ...resizeArgs ) => {
 					onResizeStart( ...resizeArgs );
-					const [ , resizeDirection ] = resizeArgs;
+					const [ , resizeDirection, resizeElement ] = resizeArgs;
+
+					// The 'ref' prop on the `ResizableBox` component is used to expose the re-resizable API.
+					// This seems to be the only way to get a ref to the element.
+					resizableRef.current = resizeElement;
+
 					// TODO - reconsider supported alignments.
 					// Wide and Full currently don't show drag handles, but could do.
 					// Left and Right alignments could also work, but are trickier to implement.
@@ -223,14 +235,13 @@ function ResizableAlignmentControls( {
 				} }
 				resizeRatio={ currentAlignment === 'center' ? 2 : 1 }
 			>
-				<div
-					style={ {
-						visibility: snappedAlignment ? 'hidden' : 'visible',
-						width: '100%',
-					} }
+				<motion.div
+					layout
+					style={ contentStyle }
+					transition={ { duration: 0.3 } }
 				>
 					{ children }
-				</div>
+				</motion.div>
 			</ResizableBox>
 		</>
 	);

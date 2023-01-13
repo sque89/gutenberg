@@ -68,7 +68,7 @@ export default function BlockAlignmentVisualizer( {
 	const layoutBlockElement = useBlockElement( layoutClientId );
 
 	// useBlockElement is unable to return the document's root block list.
-	// __unsableElementContext seems to provide this.
+	// __unstableElementContext seems to provide this.
 	const rootBlockListElement = useContext(
 		BlockList.__unstableElementContext
 	);
