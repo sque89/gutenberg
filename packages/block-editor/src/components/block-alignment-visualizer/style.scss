@@ -1,15 +1,20 @@
 
-.block-editor__alignment-visualizer {
+.block-editor-alignment-visualizer {
 	z-index: 0;
 }
+.block-editor-alignment-visualizer__cover-element {
+	z-index: 0;
 
-.block-editor__alignment-visualizer-cover-element {
-	// Make the iframe fit its container using flexbox.
-	display: flex;
+	&::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: var(--contrast-color);
+		opacity: 0.05;
 
-	.block-editor__alignment-visualizer-iframe {
-		border: none;
-		flex-grow: 1;
 	}
 }
 

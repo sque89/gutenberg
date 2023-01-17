@@ -17,6 +17,8 @@ function getComputedCSS( element, property ) {
 }
 
 export default function LayoutPopover( {
+	className,
+	coverClassName,
 	layoutClientId,
 	focusedClientId,
 	hasLayoutPadding,
@@ -100,9 +102,9 @@ export default function LayoutPopover( {
 
 	return (
 		<Popover
+			className={ className }
 			anchor={ popoverAnchor }
 			placement="top-start"
-			className="block-editor__alignment-visualizer"
 			animate={ false }
 			focusOnMount={ false }
 			flip={ false }
@@ -110,10 +112,7 @@ export default function LayoutPopover( {
 			variant="unstyled"
 			__unstableInline
 		>
-			<div
-				className="block-editor__alignment-visualizer-cover-element"
-				style={ coverElementStyle }
-			>
+			<div className={ coverClassName } style={ coverElementStyle }>
 				{ children }
 			</div>
 		</Popover>

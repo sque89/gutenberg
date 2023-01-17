@@ -48,19 +48,6 @@ function getVisibleHandles( alignment ) {
 	return { right: true, left: false, bottom: true, top: false };
 }
 
-function getOffsetRect( element ) {
-	const frame = element?.ownerDocument?.defaultView?.frameElement;
-	const frameRect = frame?.getBoundingClientRect();
-	const elementRect = element?.getBoundingClientRect();
-
-	return new window.DOMRect(
-		elementRect.x + ( frameRect?.left ?? 0 ),
-		elementRect.y + ( frameRect?.top ?? 0 ),
-		elementRect.width,
-		elementRect.height
-	);
-}
-
 /**
  * Detect the alignment zone that is currently closest to the `point`.
  *
@@ -69,7 +56,7 @@ function getOffsetRect( element ) {
  * @param {Map}            alignmentGuides  A Map of alignment zone nodes.
  */
 function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
-	const offsetResizableRect = getOffsetRect( resizableElement );
+	const offsetResizableRect = resizableElement.getBoundingClientRect();
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
 	// - Caveat: this assumes horizontal resizing.
@@ -82,7 +69,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 
 	// Loop through alignment zone nodes.
 	alignmentGuides?.forEach( ( zone, name ) => {
-		const offsetZoneRect = getOffsetRect( zone );
+		const offsetZoneRect = zone.getBoundingClientRect();
 
 		// Calculate the distance from the resizeable element's edge to the
 		// alignment zone's edge.
@@ -156,7 +143,7 @@ function ResizableAlignmentControls( {
 
 		// Calculate the correct positioning to overlay the element over the alignment zone when snapping.
 		const snappedZone = alignmentGuides.get( snappedAlignment );
-		const zoneRect = getOffsetRect( snappedZone );
+		const zoneRect = snappedZone.getBoundingClientRect();
 		const contentRect = resizableRef.current.getBoundingClientRect();
 
 		return {

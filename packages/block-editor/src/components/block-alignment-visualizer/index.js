@@ -4,12 +4,11 @@
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import Iframe from './iframe';
+import ShadowDOMContainer from './shadow-dom-container';
 import BlockAlignmentVisualizerGuide, { guideIframeStyles } from './guide';
 import LayoutPopover from './layout-popover';
 import { useLayout, LayoutStyle } from '../block-list/layout';
@@ -81,47 +80,19 @@ export default function BlockAlignmentVisualizer( {
 
 	return (
 		<LayoutPopover
+			className="block-editor-alignment-visualizer"
+			coverClassName="block-editor-alignment-visualizer__cover-element"
 			layoutClientId={ layoutClientId }
 			focusedClientId={ focusedClientId }
 			hasLayoutPadding={ layout.type !== 'constrained' }
 		>
-			<Iframe
-				className="block-editor__alignment-visualizer-iframe"
-				title={ __( 'Alignment visualizer' ) }
-				headChildren={
-					<>
-						<style>
-							{ `
-								:root {
-									--contrast-color: ${ contrastColor }
-								}
-
-								html {
-									overflow: hidden;
-								}
-
-								body::before {
-									content: "";
-									position: absolute;
-									top: 0;
-									right: 0;
-									bottom: 0;
-									left: 0;
-									background-color: var(--contrast-color);
-									opacity: 0.05;
-								}
-
-								${ guideIframeStyles }
-							` }
-						</style>
-						<LayoutStyle
-							blockName={ layoutBlockName }
-							layout={ layout }
-							selector=".block-editor-alignment-visualizer-guide__layout"
-						/>
-					</>
-				}
-			>
+			<ShadowDOMContainer>
+				<LayoutStyle
+					blockName={ layoutBlockName }
+					layout={ layout }
+					selector=".block-editor-alignment-visualizer-guide__layout"
+				/>
+				<style>{ guideIframeStyles( contrastColor ) }</style>
 				<div className="editor-styles-wrapper">
 					{ availableAlignments.map( ( { name } ) => (
 						<BlockAlignmentVisualizerGuide
@@ -133,7 +104,7 @@ export default function BlockAlignmentVisualizer( {
 						/>
 					) ) }
 				</div>
-			</Iframe>
+			</ShadowDOMContainer>
 		</LayoutPopover>
 	);
 }

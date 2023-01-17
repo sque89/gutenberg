@@ -34,7 +34,7 @@ const ALIGNMENTS = {
 // Because the guide elements are within an iframe, styles can't be
 // declared in a scss file, those styles are defined here to co-locate
 // them with the component.
-export const guideIframeStyles = `
+export const guideIframeStyles = ( contrastColor ) => `
 .block-editor-alignment-visualizer-guide__layout {
 	position: absolute;
 	top: 0;
@@ -49,8 +49,8 @@ export const guideIframeStyles = `
 	max-width: 100%;
 	margin: 0 auto;
 	opacity: 0.7;
-	border-left: solid 2px var(--contrast-color);
-	border-right: solid 2px var(--contrast-color);
+	border-left: solid 2px ${ contrastColor };
+	border-right: solid 2px ${ contrastColor };
 }
 `;
 
