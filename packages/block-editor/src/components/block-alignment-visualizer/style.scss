@@ -8,6 +8,7 @@
 	display: flex;
 
 	.block-editor__alignment-visualizer-iframe {
+		border: none;
 		flex-grow: 1;
 	}
 }
