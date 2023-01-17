@@ -92,7 +92,7 @@ export default function BlockAlignmentVisualizer( {
 					layout={ layout }
 					selector=".block-editor-alignment-visualizer-guide__layout"
 				/>
-				<style>{ guideIframeStyles( contrastColor ) }</style>
+				<style>{ guideIframeStyles }</style>
 				<div className="editor-styles-wrapper">
 					{ availableAlignments.map( ( { name } ) => (
 						<BlockAlignmentVisualizerGuide
