@@ -84,7 +84,7 @@ export default function BlockAlignmentVisualizer( {
 			coverClassName="block-editor-alignment-visualizer__cover-element"
 			layoutClientId={ layoutClientId }
 			focusedClientId={ focusedClientId }
-			hasLayoutPadding={ layout.type !== 'constrained' }
+			isConstrained={ layout.type === 'constrained' }
 		>
 			<ShadowDOMContainer>
 				<LayoutStyle

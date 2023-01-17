@@ -21,7 +21,7 @@ export default function LayoutPopover( {
 	coverClassName,
 	layoutClientId,
 	focusedClientId,
-	hasLayoutPadding,
+	isConstrained,
 	children,
 } ) {
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
@@ -36,8 +36,9 @@ export default function LayoutPopover( {
 	);
 
 	useEffect( () => {
-		const resolvedLayoutElement =
-			layoutBlockElement ?? rootBlockListElement;
+		const resolvedLayoutElement = isConstrained
+			? layoutBlockElement
+			: rootBlockListElement;
 		if ( ! focusedBlockElement || ! resolvedLayoutElement ) {
 			return;
 		}
@@ -67,12 +68,14 @@ export default function LayoutPopover( {
 
 			// The cover element is an inner element within the popover. It has the width of the layout
 			// and height of the focused block, and also matches any padding of the layout.
-			const paddingLeft = hasLayoutPadding
-				? getComputedCSS( resolvedLayoutElement, 'padding-left' )
-				: 0;
-			const paddingRight = hasLayoutPadding
-				? getComputedCSS( resolvedLayoutElement, 'padding-right' )
-				: 0;
+			const paddingLeft = getComputedCSS(
+				resolvedLayoutElement,
+				'padding-left'
+			);
+			const paddingRight = getComputedCSS(
+				resolvedLayoutElement,
+				'padding-right'
+			);
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedLayoutElement.offsetWidth,
@@ -97,7 +100,7 @@ export default function LayoutPopover( {
 		focusedBlockElement,
 		layoutBlockElement,
 		rootBlockListElement,
-		hasLayoutPadding,
+		isConstrained,
 	] );
 
 	return (
