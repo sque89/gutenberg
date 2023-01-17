@@ -222,7 +222,7 @@ function ResizableAlignmentControls( {
 				<motion.div
 					layout
 					style={ contentStyle }
-					transition={ { duration: 0.3 } }
+					transition={ { duration: 0.2 } }
 				>
 					{ children }
 				</motion.div>
