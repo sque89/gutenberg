@@ -56,26 +56,26 @@ function getVisibleHandles( alignment ) {
  * @param {Map}            alignmentGuides  A Map of alignment zone nodes.
  */
 function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
-	const offsetResizableRect = resizableElement.getBoundingClientRect();
+	const resizableRect = resizableElement.getBoundingClientRect();
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
 	// - Caveat: this assumes horizontal resizing.
 	const pointFromResizableRectEdge = {
-		x: offsetResizableRect[ resizeDirection ],
-		y: offsetResizableRect.top,
+		x: resizableRect[ resizeDirection ],
+		y: resizableRect.top,
 	};
 
 	let candidateZone;
 
 	// Loop through alignment zone nodes.
 	alignmentGuides?.forEach( ( zone, name ) => {
-		const offsetZoneRect = zone.getBoundingClientRect();
+		const zoneRect = zone.getBoundingClientRect();
 
 		// Calculate the distance from the resizeable element's edge to the
 		// alignment zone's edge.
 		const distance = getDistanceFromPointToEdge(
 			pointFromResizableRectEdge,
-			offsetZoneRect,
+			zoneRect,
 			resizeDirection
 		);
 
