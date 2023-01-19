@@ -36,9 +36,10 @@ export default function LayoutPopover( {
 	);
 
 	useEffect( () => {
-		const resolvedLayoutElement = isConstrained
-			? layoutBlockElement
-			: rootBlockListElement;
+		const resolvedLayoutElement =
+			isConstrained && layoutBlockElement
+				? layoutBlockElement
+				: rootBlockListElement;
 		if ( ! focusedBlockElement || ! resolvedLayoutElement ) {
 			return;
 		}
