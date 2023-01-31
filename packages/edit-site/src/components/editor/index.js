@@ -9,6 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import {
 	BlockContextProvider,
 	BlockBreadcrumb,
+	__experimentalLoadingScreen as LoadingScreen,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import {
@@ -65,6 +66,7 @@ export default function Editor() {
 		isListViewOpen,
 		isSaveViewOpen,
 		showIconLabels,
+		globalStylesId,
 	} = useSelect( ( select ) => {
 		const {
 			getEditedPostType,
@@ -76,11 +78,20 @@ export default function Editor() {
 			isListViewOpened,
 			isSaveViewOpened,
 		} = select( editSiteStore );
-		const { hasFinishedResolution, getEntityRecord } = select( coreStore );
+		const {
+			hasFinishedResolution,
+			getEntityRecord,
+			__experimentalGetCurrentGlobalStylesId,
+			getEditedEntityRecord,
+		} = select( coreStore );
 		const { __unstableGetEditorMode } = select( blockEditorStore );
 		const { getActiveComplementaryArea } = select( interfaceStore );
 		const postType = getEditedPostType();
 		const postId = getEditedPostId();
+		const _globalStylesId = __experimentalGetCurrentGlobalStylesId();
+		const globalStylesRecord = _globalStylesId
+			? getEditedEntityRecord( 'root', 'globalStyles', _globalStylesId )
+			: undefined;
 
 		// The currently selected entity to display.
 		// Typically template or template part in the site editor.
@@ -111,6 +122,8 @@ export default function Editor() {
 				'core/edit-site',
 				'showIconLabels'
 			),
+			globalStylesId: _globalStylesId,
+			globalStylesRecord,
 		};
 	}, [] );
 	const { setIsSaveViewOpened, setEditedPostContext } =
@@ -149,6 +162,42 @@ export default function Editor() {
 	// action in <URlQueryController> from double-announcing.
 	useTitle( isReady && __( 'Editor (beta)' ) );
 
+	const contentDependencies = [
+		// Global styles entity ID
+		{
+			store: coreStore,
+			selector: '__experimentalGetCurrentGlobalStylesId',
+		},
+		// Global styles entity
+		globalStylesId && {
+			store: coreStore,
+			selector: 'getEditedEntityRecord',
+			args: [ 'root', 'globalStyles', globalStylesId ],
+		},
+		// Menus
+		{
+			store: coreStore,
+			selector: 'getEntityRecords',
+			args: [ 'root', 'menu', { per_page: -1, context: 'edit' } ],
+		},
+		// Pages
+		{
+			store: coreStore,
+			selector: 'getEntityRecords',
+			args: [
+				'postType',
+				'page',
+				{
+					parent: 0,
+					order: 'asc',
+					orderby: 'id',
+					per_page: -1,
+					context: 'view',
+				},
+			],
+		},
+	].filter( Boolean );
+
 	if ( ! isReady ) {
 		return <CanvasSpinner />;
 	}
@@ -173,7 +222,9 @@ export default function Editor() {
 								}
 								notices={ isEditMode && <EditorSnackbars /> }
 								content={
-									<>
+									<LoadingScreen
+										dataDependencies={ contentDependencies }
+									>
 										<GlobalStylesRenderer />
 										{ isEditMode && <EditorNotices /> }
 										{ showVisualEditor && editedPost && (
@@ -193,7 +244,7 @@ export default function Editor() {
 											</Notice>
 										) }
 										{ isEditMode && <KeyboardShortcuts /> }
-									</>
+									</LoadingScreen>
 								}
 								secondarySidebar={
 									isEditMode &&
