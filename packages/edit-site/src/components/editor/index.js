@@ -224,6 +224,11 @@ export default function Editor() {
 								content={
 									<LoadingScreen
 										dataDependencies={ contentDependencies }
+										overlayClassName={
+											isViewMode
+												? 'is-canvas-view'
+												: undefined
+										}
 									>
 										<GlobalStylesRenderer />
 										{ isEditMode && <EditorNotices /> }
