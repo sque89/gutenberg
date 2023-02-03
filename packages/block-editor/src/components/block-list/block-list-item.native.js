@@ -7,7 +7,7 @@ import { View, Dimensions } from 'react-native';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
+import { AsyncModeProvider, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { ReadableContentView, alignmentHelpers } from '@wordpress/components';
 
@@ -111,6 +111,8 @@ export class BlockListItem extends Component {
 			marginHorizontal,
 			blockName,
 			blockWidth,
+			visibleBlocks,
+			selectedBlock,
 			...restProps
 		} = this.props;
 
@@ -136,15 +138,23 @@ export class BlockListItem extends Component {
 					{ shouldShowInsertionPointBefore && (
 						<BlockInsertionPoint />
 					) }
-					<BlockListBlock
+					<AsyncModeProvider
 						key={ clientId }
-						showTitle={ false }
-						clientId={ clientId }
-						parentWidth={ parentWidth }
-						{ ...restProps }
-						marginHorizontal={ this.getMarginHorizontal() }
-						blockWidth={ blockWidth }
-					/>
+						value={
+							! visibleBlocks.has( clientId ) &&
+							! selectedBlock.includes( clientId )
+						}
+					>
+						<BlockListBlock
+							key={ clientId }
+							showTitle={ false }
+							clientId={ clientId }
+							parentWidth={ parentWidth }
+							{ ...restProps }
+							marginHorizontal={ this.getMarginHorizontal() }
+							blockWidth={ blockWidth }
+						/>
+					</AsyncModeProvider>
 					{ ! shouldShowInnerBlockAppender() &&
 						shouldShowInsertionPointAfter && (
 							<BlockInsertionPoint />
@@ -188,6 +198,8 @@ export default compose( [
 				getSettings,
 				getBlockParents,
 				getBlock,
+				getSelectedBlockClientIds,
+				__unstableGetVisibleBlocks,
 			} = select( blockEditorStore );
 
 			const blockClientIds = getBlockOrder( rootClientId );
@@ -231,6 +243,8 @@ export default compose( [
 				parentBlockAlignment,
 				blockName: name,
 				parentBlockName,
+				selectedBlock: getSelectedBlockClientIds(),
+				visibleBlocks: __unstableGetVisibleBlocks(),
 			};
 		}
 	),

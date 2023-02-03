@@ -7,7 +7,7 @@ import { View, Platform, TouchableWithoutFeedback } from 'react-native';
  * WordPress dependencies
  */
 import { Component, createContext } from '@wordpress/element';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { AsyncModeProvider, withDispatch, withSelect } from '@wordpress/data';
 import { compose, withPreferredColorScheme } from '@wordpress/compose';
 import { createBlock } from '@wordpress/blocks';
 import {
@@ -352,24 +352,26 @@ export class BlockList extends Component {
 			tileIndex: blockClientIds.indexOf( clientId ),
 		};
 		return (
-			<BlockListItem
-				isStackedHorizontally={ isStackedHorizontally }
-				rootClientId={ rootClientId }
-				clientId={ clientId }
-				parentWidth={ parentWidth }
-				contentResizeMode={ contentResizeMode }
-				contentStyle={ contentStyle }
-				onAddBlock={ onAddBlock }
-				marginVertical={ marginVertical }
-				marginHorizontal={ marginHorizontal }
-				onDeleteBlock={ onDeleteBlock }
-				shouldShowInnerBlockAppender={
-					this.shouldShowInnerBlockAppender
-				}
-				blockWidth={ blockWidth }
-				isGridItem={ isGridItem }
-				{ ...gridItemProps }
-			/>
+			<AsyncModeProvider value={ false }>
+				<BlockListItem
+					isStackedHorizontally={ isStackedHorizontally }
+					rootClientId={ rootClientId }
+					clientId={ clientId }
+					parentWidth={ parentWidth }
+					contentResizeMode={ contentResizeMode }
+					contentStyle={ contentStyle }
+					onAddBlock={ onAddBlock }
+					marginVertical={ marginVertical }
+					marginHorizontal={ marginHorizontal }
+					onDeleteBlock={ onDeleteBlock }
+					shouldShowInnerBlockAppender={
+						this.shouldShowInnerBlockAppender
+					}
+					blockWidth={ blockWidth }
+					isGridItem={ isGridItem }
+					{ ...gridItemProps }
+				/>
+			</AsyncModeProvider>
 		);
 	}
 
