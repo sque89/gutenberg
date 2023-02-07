@@ -352,3 +352,14 @@ function gutenberg_register_legacy_social_link_blocks() {
 }
 
 add_action( 'init', 'gutenberg_register_legacy_social_link_blocks' );
+
+register_block_pattern(
+	'query/template-type-test',
+	array(
+		'title'      => __( 'Template type test', 'gutenberg' ),
+		'templateTypes' => array( '404', 'author' ),
+		'content'    => '<!-- wp:paragraph {"align":"center","fontSize":"x-large"} -->
+						<p class="has-text-align-center has-x-large-font-size">404</p>
+						<!-- /wp:paragraph -->',
+	)
+);
