@@ -13,13 +13,16 @@ import { WP_ADMIN_USER, WP_BASE_URL } from '../config';
 import type { User } from './login';
 import { login } from './login';
 import { listMedia, uploadMedia, deleteMedia, deleteAllMedia } from './media';
+import { createUser, deleteAllUsers } from './users';
 import { setupRest, rest, getMaxBatchSize, batchRest } from './rest';
 import { getPluginsMap, activatePlugin, deactivatePlugin } from './plugins';
 import { deleteAllTemplates } from './templates';
 import { activateTheme } from './themes';
 import { deleteAllBlocks } from './blocks';
-import { deleteAllPosts } from './posts';
+import { createComment, deleteAllComments } from './comments';
+import { createPost, deleteAllPosts } from './posts';
 import { resetPreferences } from './preferences';
+import { getSiteSettings, updateSiteSettings } from './site-settings';
 import { deleteAllWidgets, addWidgetBlock } from './widgets';
 
 interface StorageState {
@@ -120,7 +123,10 @@ class RequestUtils {
 	deactivatePlugin = deactivatePlugin.bind( this );
 	activateTheme = activateTheme.bind( this );
 	deleteAllBlocks = deleteAllBlocks;
+	createPost = createPost.bind( this );
 	deleteAllPosts = deleteAllPosts.bind( this );
+	createComment = createComment.bind( this );
+	deleteAllComments = deleteAllComments.bind( this );
 	deleteAllWidgets = deleteAllWidgets.bind( this );
 	addWidgetBlock = addWidgetBlock.bind( this );
 	deleteAllTemplates = deleteAllTemplates.bind( this );
@@ -129,6 +135,10 @@ class RequestUtils {
 	uploadMedia = uploadMedia.bind( this );
 	deleteMedia = deleteMedia.bind( this );
 	deleteAllMedia = deleteAllMedia.bind( this );
+	createUser = createUser.bind( this );
+	deleteAllUsers = deleteAllUsers.bind( this );
+	getSiteSettings = getSiteSettings.bind( this );
+	updateSiteSettings = updateSiteSettings.bind( this );
 }
 
 export type { StorageState };

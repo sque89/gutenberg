@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import combineReducers from 'turbo-combine-reducers';
+import turboCombineReducers from 'turbo-combine-reducers';
 
 /**
  * Internal dependencies
@@ -43,6 +43,7 @@ export { plugins };
  * The combineReducers helper function turns an object whose values are different
  * reducing functions into a single reducing function you can pass to registerReducer.
  *
+ * @type  {import('./types').combineReducers}
  * @param {Object} reducers An object whose values correspond to different reducing
  *                          functions that need to be combined into one.
  *
@@ -77,7 +78,7 @@ export { plugins };
  * @return {Function} A reducer that invokes every reducer inside the reducers
  *                    object, and constructs a state object with the same shape.
  */
-export { combineReducers };
+export const combineReducers = turboCombineReducers;
 
 /**
  * Given a store descriptor, returns an object of the store's selectors.
@@ -97,6 +98,8 @@ export { combineReducers };
  * ```
  *
  * @return {Object} Object containing the store's selectors.
+ *
+ * @type {(storeNameOrDescriptor: StoreDescriptor|string) => Object}
  */
 export const select = defaultRegistry.select;
 
@@ -153,15 +156,21 @@ export const suspendSelect = defaultRegistry.suspendSelect;
  * dispatch( myCustomStore ).setPrice( 'hammer', 9.75 );
  * ```
  * @return {Object} Object containing the action creators.
+ *
+ * @type {(storeNameOrDescriptor: StoreDescriptor|string) => Object}
  */
 export const dispatch = defaultRegistry.dispatch;
 
 /**
  * Given a listener function, the function will be called any time the state value
- * of one of the registered stores has changed. This function returns a `unsubscribe`
- * function used to stop the subscription.
+ * of one of the registered stores has changed. If you specify the optional
+ * `storeNameOrDescriptor` parameter, the listener function will be called only
+ * on updates on that one specific registered store.
  *
- * @param {Function} listener Callback function.
+ * This function returns an `unsubscribe` function used to stop the subscription.
+ *
+ * @param {Function}                listener              Callback function.
+ * @param {string|StoreDescriptor?} storeNameOrDescriptor Optional store name.
  *
  * @example
  * ```js

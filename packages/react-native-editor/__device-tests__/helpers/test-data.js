@@ -143,7 +143,7 @@ exports.audioBlockPlaceholder = `<!-- wp:audio {"id":5} -->
 <!-- /wp:audio -->`;
 
 exports.headerBlockEmpty = `<!-- wp:heading -->
-<h2></h2>
+<h2 class="wp-block-heading"></h2>
 <!-- /wp:heading -->`;
 
 exports.separatorBlockEmpty = `<!-- wp:separator -->
@@ -151,7 +151,9 @@ exports.separatorBlockEmpty = `<!-- wp:separator -->
 <!-- /wp:separator -->`;
 
 exports.listBlockEmpty = `<!-- wp:list -->
-<ul><li></li></ul>
+<ul><!-- wp:list-item -->
+<li></li>
+<!-- /wp:list-item --></ul>
 <!-- /wp:list -->`;
 
 exports.imageBlockEmpty = `<!-- wp:image -->
