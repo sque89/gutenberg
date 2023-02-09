@@ -213,6 +213,7 @@ function RichTextWrapper(
 
 	const onSelectionChange = useCallback(
 		( selectionChangeStart, selectionChangeEnd ) => {
+			// TODO: David, this causes a queue of events and prolonged CPU usage
 			selectionChange(
 				clientId,
 				identifier,

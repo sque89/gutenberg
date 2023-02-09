@@ -68,6 +68,7 @@ function ParagraphBlock( {
 				deleteEnter={ true }
 				style={ styles }
 				onChange={ ( nextContent ) => {
+					// TODO: David, this causes a queue of events and prolonged CPU usage
 					setAttributes( {
 						content: nextContent,
 					} );

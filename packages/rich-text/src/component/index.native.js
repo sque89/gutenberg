@@ -344,6 +344,7 @@ export class RichText extends Component {
 
 		// We don't want to refresh if our goal is just to create a record.
 		if ( refresh ) {
+			// TODO: David, this causes a queue of events and prolonged CPU usage
 			this.props.onChange( formattedContent );
 		}
 	}
@@ -584,6 +585,8 @@ export class RichText extends Component {
 		// We know for certain that on focus, the old selection is invalid. It
 		// will be recalculated on `selectionchange`.
 
+		// TODO: David, this causes a queue of events and prolonged CPU usage
+		console.log( '>>> onFocus', this.selectionStart, this.selectionEnd );
 		onSelectionChange( this.selectionStart, this.selectionEnd );
 
 		this.lastAztecEventType = 'focus';
