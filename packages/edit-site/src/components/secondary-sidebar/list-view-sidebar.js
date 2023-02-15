@@ -2,8 +2,8 @@
  * WordPress dependencies
  */
 import {
-	privateApis as blockEditorPrivateApis,
 	__experimentalListView as ListView,
+	BlockSettingsDropdown,
 } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import {
@@ -21,7 +21,6 @@ import { ESCAPE } from '@wordpress/keycodes';
  * Internal dependencies
  */
 import { store as editSiteStore } from '../../store';
-import { unlock } from '../../private-apis';
 
 export default function ListViewSidebar() {
 	const { setIsListViewOpened } = useDispatch( editSiteStore );
@@ -37,7 +36,6 @@ export default function ListViewSidebar() {
 
 	const instanceId = useInstanceId( ListViewSidebar );
 	const labelId = `edit-site-editor__list-view-panel-label-${ instanceId }`;
-	const { LeafMoreMenu } = unlock( blockEditorPrivateApis );
 
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -64,7 +62,7 @@ export default function ListViewSidebar() {
 					focusOnMountRef,
 				] ) }
 			>
-				<ListView LeafMoreMenu={ LeafMoreMenu } />
+				<ListView MoreMenuComponent={ BlockSettingsDropdown } />
 			</div>
 		</div>
 	);

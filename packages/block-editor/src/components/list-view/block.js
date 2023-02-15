@@ -32,7 +32,6 @@ import {
 	BlockMoverDownButton,
 } from '../block-mover/button';
 import ListViewBlockContents from './block-contents';
-import BlockSettingsDropdown from '../block-settings-menu/block-settings-dropdown';
 import { useListViewContext } from './context';
 import { getBlockPositionDescription } from './utils';
 import { store as blockEditorStore } from '../../store';
@@ -133,7 +132,7 @@ function ListViewBlock( {
 		  )
 		: __( 'Options' );
 
-	const { isTreeGridMounted, expand, collapse, LeafMoreMenu } =
+	const { isTreeGridMounted, expand, collapse, MoreMenuComponent } =
 		useListViewContext();
 
 	const hasSiblings = siblingBlockCount > 0;
@@ -220,10 +219,6 @@ function ListViewBlock( {
 	const dropdownClientIds = selectedClientIds.includes( clientId )
 		? selectedClientIds
 		: [ clientId ];
-
-	const MoreMenuComponent = LeafMoreMenu
-		? LeafMoreMenu
-		: BlockSettingsDropdown;
 
 	return (
 		<ListViewLeaf
@@ -313,22 +308,24 @@ function ListViewBlock( {
 					className={ listViewBlockSettingsClassName }
 					aria-selected={ !! isSelected || forceSelectionContentLock }
 				>
-					{ ( { ref, tabIndex, onFocus } ) => (
-						<MoreMenuComponent
-							clientIds={ dropdownClientIds }
-							block={ block }
-							icon={ moreVertical }
-							label={ settingsAriaLabel }
-							toggleProps={ {
-								ref,
-								className: 'block-editor-list-view-block__menu',
-								tabIndex,
-								onFocus,
-							} }
-							disableOpenOnArrowDown
-							__experimentalSelectBlock={ updateSelection }
-						/>
-					) }
+					{ MoreMenuComponent &&
+						( ( { ref, tabIndex, onFocus } ) => (
+							<MoreMenuComponent
+								clientIds={ dropdownClientIds }
+								block={ block }
+								icon={ moreVertical }
+								label={ settingsAriaLabel }
+								toggleProps={ {
+									ref,
+									className:
+										'block-editor-list-view-block__menu',
+									tabIndex,
+									onFocus,
+								} }
+								disableOpenOnArrowDown
+								__experimentalSelectBlock={ updateSelection }
+							/>
+						) ) }
 				</TreeGridCell>
 			) }
 		</ListViewLeaf>
