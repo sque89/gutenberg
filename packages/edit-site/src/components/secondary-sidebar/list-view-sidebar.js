@@ -64,9 +64,7 @@ export default function ListViewSidebar() {
 					focusOnMountRef,
 				] ) }
 			>
-				sdfds
 				<ListView LeafMoreMenu={ LeafMoreMenu } />
-				sdfdsf
 			</div>
 		</div>
 	);
