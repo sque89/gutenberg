@@ -133,7 +133,8 @@ function ListViewBlock( {
 		  )
 		: __( 'Options' );
 
-	const { isTreeGridMounted, expand, collapse } = useListViewContext();
+	const { isTreeGridMounted, expand, collapse, LeafMoreMenu } =
+		useListViewContext();
 
 	const hasSiblings = siblingBlockCount > 0;
 	const hasRenderedMovers = showBlockMovers && hasSiblings;
@@ -219,6 +220,10 @@ function ListViewBlock( {
 	const dropdownClientIds = selectedClientIds.includes( clientId )
 		? selectedClientIds
 		: [ clientId ];
+
+	const MoreMenuComponent = LeafMoreMenu
+		? LeafMoreMenu
+		: BlockSettingsDropdown;
 
 	return (
 		<ListViewLeaf
@@ -309,8 +314,9 @@ function ListViewBlock( {
 					aria-selected={ !! isSelected || forceSelectionContentLock }
 				>
 					{ ( { ref, tabIndex, onFocus } ) => (
-						<BlockSettingsDropdown
+						<MoreMenuComponent
 							clientIds={ dropdownClientIds }
+							block={ block }
 							icon={ moreVertical }
 							label={ settingsAriaLabel }
 							toggleProps={ {
