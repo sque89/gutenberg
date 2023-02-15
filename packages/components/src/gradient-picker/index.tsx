@@ -13,6 +13,7 @@ import CustomGradientPicker from '../custom-gradient-picker';
 import { VStack } from '../v-stack';
 import { ColorHeading } from '../color-palette/styles';
 import { Spacer } from '../spacer';
+import type { GradientPickerProps } from './types';
 
 // The Multiple Origin Gradients have a `gradients` property (an array of
 // gradient objects), while Single Origin ones have a `gradient` property.
@@ -116,7 +117,7 @@ export default function GradientPicker( {
 	disableCustomGradients = false,
 	__experimentalIsRenderedInSidebar,
 	headingLevel = 2,
-} ) {
+}: GradientPickerProps ) {
 	const clearGradient = useCallback(
 		() => onChange( undefined ),
 		[ onChange ]
@@ -157,7 +158,7 @@ export default function GradientPicker( {
 				{ ( gradients?.length || clearable ) && (
 					<Component
 						className={ className }
-						clearable={ clearable }
+						//TODO: Note: I think `clearable` should be removed here. It's not used by either `SingleOrigin` or `MultipleOrigin`, and appears to have been accidentally passed down in https://github.com/WordPress/gutenberg/pull/35970 along with the rest of `GradientPicker`'s props.
 						clearGradient={ clearGradient }
 						gradients={ gradients }
 						onChange={ onChange }
