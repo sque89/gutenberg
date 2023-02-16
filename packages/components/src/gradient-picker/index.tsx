@@ -13,7 +13,11 @@ import CustomGradientPicker from '../custom-gradient-picker';
 import { VStack } from '../v-stack';
 import { ColorHeading } from '../color-palette/styles';
 import { Spacer } from '../spacer';
-import type { GradientPickerProps } from './types';
+import type {
+	GradientPickerComponentProps,
+	MultipleOriginGradientPickerProps,
+	SingleOriginGradientPickerProps,
+} from './types';
 
 // The Multiple Origin Gradients have a `gradients` property (an array of
 // gradient objects), while Single Origin ones have a `gradient` property.
@@ -34,9 +38,9 @@ function SingleOrigin( {
 	onChange,
 	value,
 	actions,
-} ) {
+}: SingleOriginGradientPickerProps ) {
 	const gradientOptions = useMemo( () => {
-		return gradients.map( ( { gradient, name }, index ) => (
+		return gradients?.map( ( { gradient, name }, index ) => (
 			<CircularOptionPicker.Option
 				key={ gradient }
 				value={ gradient }
@@ -79,10 +83,10 @@ function MultipleOrigin( {
 	value,
 	actions,
 	headingLevel,
-} ) {
+}: MultipleOriginGradientPickerProps ) {
 	return (
 		<VStack spacing={ 3 } className={ className }>
-			{ gradients.map( ( { name, gradients: gradientSet }, index ) => {
+			{ gradients?.map( ( { name, gradients: gradientSet }, index ) => {
 				return (
 					<VStack spacing={ 2 } key={ index }>
 						<ColorHeading level={ headingLevel }>
@@ -95,7 +99,7 @@ function MultipleOrigin( {
 								onChange( gradient, index )
 							}
 							value={ value }
-							{ ...( gradients.length === index + 1
+							{ ...( gradients?.length === index + 1
 								? { actions }
 								: {} ) }
 						/>
@@ -117,7 +121,7 @@ export default function GradientPicker( {
 	disableCustomGradients = false,
 	__experimentalIsRenderedInSidebar,
 	headingLevel = 2,
-}: GradientPickerProps ) {
+}: GradientPickerComponentProps ) {
 	const clearGradient = useCallback(
 		() => onChange( undefined ),
 		[ onChange ]
