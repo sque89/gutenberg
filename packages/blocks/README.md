@@ -96,7 +96,7 @@ add_action( 'enqueue_block_editor_assets', 'random_image_enqueue_block_editor_as
 	}
 
 	blocks.registerBlockType( 'myplugin/random-image', {
-		apiVersion: 2,
+		apiVersion: 3,
 
 		title: 'Random Image',
 
