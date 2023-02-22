@@ -181,12 +181,9 @@ class NativeEditorProvider extends Component {
 			this.setState( { isHelpVisible: true } );
 		} );
 
-		// eslint-disable-next-line no-undef
-		if ( __DEV__ ) {
-			this.subscriptionParentSetThemeJSON = subscribeSetThemeJSON( () => {
-				this.setThemeJSONDataFromClipboard();
-			} );
-		}
+		this.subscriptionParentSetThemeJSON = subscribeSetThemeJSON( () => {
+			this.setThemeJSONDataFromClipboard();
+		} );
 
 		// Request current block impressions from native app.
 		requestBlockTypeImpressions( ( storedImpressions ) => {
@@ -249,7 +246,7 @@ class NativeEditorProvider extends Component {
 		}
 
 		// eslint-disable-next-line no-undef
-		if ( __DEV__ && this.subscriptionParentSetThemeJSON ) {
+		if ( this.subscriptionParentSetThemeJSON ) {
 			this.subscriptionParentSetThemeJSON.remove();
 		}
 	}
