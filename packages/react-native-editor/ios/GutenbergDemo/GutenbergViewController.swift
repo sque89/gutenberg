@@ -389,6 +389,7 @@ extension GutenbergViewController {
         alert.addAction(updateHtmlAction)
         alert.addAction(unsupportedBlockUIAction)
         alert.addAction(showEditorHelpAction)
+        alert.addAction(setThemeJSONAction)
         alert.addAction(cancelAction)
 
         present(alert, animated: true)
@@ -426,6 +427,16 @@ extension GutenbergViewController {
                 self.present(alert, animated: true, completion: nil)
         })
     }
+    
+    var setThemeJSONAction: UIAlertAction {
+        return UIAlertAction(
+            title: "Set theme.json from Clipboard",
+            style: .default,
+            handler: { [unowned self] action in
+                self.setThemeJSON()
+            }
+        )
+    }
 
     var unsupportedBlockUIAction: UIAlertAction {
         return UIAlertAction(
@@ -460,5 +471,9 @@ extension GutenbergViewController {
     
     func showEditorHelp() {
         gutenberg.showEditorHelp()
+    }
+    
+    func setThemeJSON() {
+        gutenberg.setThemeJSON()
     }
 }
