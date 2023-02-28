@@ -134,8 +134,8 @@ another function which itself returns an element.
 
 _Parameters_
 
--   _type_ `?(string|Function)`: Tag name or element creator
--   _props_ `Object`: Element properties, either attribute set to apply to DOM node or values to pass through to element creator
+-   _type_ `any`: Tag name or element creator
+-   _props_ `any`: Element properties, either attribute set to apply to DOM node or values to pass through to element creator
 -   _children_ `...WPElement`: Descendant elements
 
 _Returns_

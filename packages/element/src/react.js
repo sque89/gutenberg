@@ -7,7 +7,7 @@ import {
 	cloneElement,
 	Component,
 	createContext,
-	createElement,
+	createElement as createElementReact,
 	createRef,
 	forwardRef,
 	Fragment,
@@ -85,15 +85,17 @@ export { createContext };
  * Returns a new element of given type. Type can be either a string tag name or
  * another function which itself returns an element.
  *
- * @param {?(string|Function)} type     Tag name or element creator
- * @param {Object}             props    Element properties, either attribute
- *                                      set to apply to DOM node or values to
- *                                      pass through to element creator
- * @param {...WPElement}       children Descendant elements
+ * @param {any}          type     Tag name or element creator
+ * @param {any}          props    Element properties, either attribute
+ *                                set to apply to DOM node or values to
+ *                                pass through to element creator
+ * @param {...WPElement} children Descendant elements
  *
  * @return {WPElement} Element.
  */
-export { createElement };
+export function createElement( type, props, ...children ) {
+	return createElementReact( type, props, ...children );
+}
 
 /**
  * Returns an object tracking a reference to a rendered element via its

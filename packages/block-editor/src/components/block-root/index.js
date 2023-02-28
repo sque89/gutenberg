@@ -32,9 +32,13 @@ export const BlockRoot = forwardRef( ( props, ref ) => {
 		<EnvironmentContext.Consumer>
 			{ ( env ) =>
 				env === 'save' ? (
-					<BlockRootSave { ...props } />
+					<BlockRootSave { ...props } data-wp-debug={ env } />
 				) : (
-					<BlockRootEdit ref={ ref } { ...props } />
+					<BlockRootEdit
+						ref={ ref }
+						{ ...props }
+						data-wp-debug={ 'edit' }
+					/>
 				)
 			}
 		</EnvironmentContext.Consumer>
