@@ -69,20 +69,20 @@ export default function LayoutPopover( {
 
 			// The cover element is an inner element within the popover. It has the width of the layout
 			// and height of the focused block, and also matches any padding of the layout.
-			const paddingLeft = getComputedCSS(
-				resolvedLayoutElement,
-				'padding-left'
-			);
-			const paddingRight = getComputedCSS(
-				resolvedLayoutElement,
-				'padding-right'
-			);
+			// const paddingLeft = getComputedCSS(
+			// 	resolvedLayoutElement,
+			// 	'padding-left'
+			// );
+			// const paddingRight = getComputedCSS(
+			// 	resolvedLayoutElement,
+			// 	'padding-right'
+			// );
 			setCoverElementStyle( {
 				position: 'absolute',
 				width: resolvedLayoutElement.offsetWidth,
 				height: focusedBlockElement.offsetHeight,
-				paddingLeft,
-				paddingRight,
+				// paddingLeft,
+				// paddingRight,
 			} );
 		};
 
