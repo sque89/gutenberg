@@ -81,11 +81,13 @@ function getOffsetRect( element, rect ) {
 }
 
 /**
- * Detect the alignment zone that is currently closest to the `point`.
+ * Detect the alignment guide that is currently closest to the `point`.
  *
  * @param {Node}           resizableElement The element being resized.
  * @param {'left'|'right'} resizeDirection  The direction being resized.
- * @param {Map}            alignmentGuides  A Map of alignment zone nodes.
+ * @param {Map}            alignmentGuides  A Map of alignment guide nodes.
+ *
+ * @return {null|'none'|'wide'|'full'} The alignment guide or `null` if no snapping was detected.
  */
 function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 	const resizableRect = getOffsetRect( resizableElement );
@@ -97,7 +99,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 		y: resizableRect.top,
 	};
 
-	let candidateZone;
+	let candidateZone = null;
 
 	// Loop through alignment zone nodes.
 	alignmentGuides?.forEach( ( zone, name ) => {
