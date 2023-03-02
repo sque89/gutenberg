@@ -49,6 +49,38 @@ function getVisibleHandles( alignment ) {
 }
 
 /**
+ * Offset an element by any parent iframes to get its true rect.
+ *
+ * @param {Element}  element The dom element to return the rect.
+ * @param {?DOMRect} rect    The rect to offset. Only use if you already have `element`'s rect,
+ *                           this will save a call to `getBoundingClientRect`.
+ *
+ * @return {DOMRect} The rect offset by any parent iframes.
+ */
+function getOffsetRect( element, rect ) {
+	const frame = element?.ownerDocument?.defaultView?.frameElement;
+
+	// Return early when there's no parent iframe.
+	if ( ! frame ) {
+		return rect ?? element.getBoundingClientRect();
+	}
+
+	const frameRect = frame?.getBoundingClientRect();
+	rect = rect ?? element?.getBoundingClientRect();
+
+	const offsetRect = new window.DOMRect(
+		rect.x + ( frameRect?.left ?? 0 ),
+		rect.y + ( frameRect?.top ?? 0 ),
+		rect.width,
+		rect.height
+	);
+
+	// Perform a tail recursion and continue offsetting
+	// by the next parent iframe.
+	return getOffsetRect( frame, offsetRect );
+}
+
+/**
  * Detect the alignment zone that is currently closest to the `point`.
  *
  * @param {Node}           resizableElement The element being resized.
@@ -56,7 +88,7 @@ function getVisibleHandles( alignment ) {
  * @param {Map}            alignmentGuides  A Map of alignment zone nodes.
  */
 function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
-	const resizableRect = resizableElement.getBoundingClientRect();
+	const resizableRect = getOffsetRect( resizableElement );
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
 	// - Caveat: this assumes horizontal resizing.
@@ -69,7 +101,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 
 	// Loop through alignment zone nodes.
 	alignmentGuides?.forEach( ( zone, name ) => {
-		const zoneRect = zone.getBoundingClientRect();
+		const zoneRect = getOffsetRect( zone );
 
 		// Calculate the distance from the resizeable element's edge to the
 		// alignment zone's edge.
@@ -87,6 +119,7 @@ function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
 
 	return candidateZone;
 }
+
 const throttledDetectSnapping = throttle( detectSnapping, 100 );
 
 /**
@@ -143,8 +176,8 @@ function ResizableAlignmentControls( {
 
 		// Calculate the correct positioning to overlay the element over the alignment zone when snapping.
 		const snappedZone = alignmentGuides.get( snappedAlignment );
-		const zoneRect = snappedZone.getBoundingClientRect();
-		const contentRect = resizableRef.current.getBoundingClientRect();
+		const zoneRect = getOffsetRect( snappedZone );
+		const contentRect = getOffsetRect( resizableRef.current );
 
 		return {
 			position: 'absolute',
