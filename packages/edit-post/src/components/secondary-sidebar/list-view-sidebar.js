@@ -45,10 +45,13 @@ export default function ListViewSidebar() {
 	const headerFocusReturnRef = useFocusReturn();
 	const contentFocusReturnRef = useFocusReturn();
 
+	const [ tab, setTab ] = useState( 'list-view' );
+
 	function closeOnEscape( event ) {
 		// If there is a block selection, then skip closing the list view
 		// and clear out the block selection instead.
 		if (
+			tab === 'list-view' &&
 			event.keyCode === ESCAPE &&
 			! event.defaultPrevented &&
 			hasBlockSelection
@@ -63,8 +66,6 @@ export default function ListViewSidebar() {
 			setIsListViewOpened( false );
 		}
 	}
-
-	const [ tab, setTab ] = useState( 'list-view' );
 
 	// This ref refers to the sidebar as a whole.
 	const sidebarRef = useRef();
