@@ -6,14 +6,17 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __experimentalListView as ListView } from '@wordpress/block-editor';
+import {
+	__experimentalListView as ListView,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import {
 	useFocusOnMount,
 	useFocusReturn,
 	useMergeRefs,
 } from '@wordpress/compose';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { focus } from '@wordpress/dom';
 import { useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -29,12 +32,32 @@ import ListViewOutline from './list-view-outline';
 
 export default function ListViewSidebar() {
 	const { setIsListViewOpened } = useDispatch( editPostStore );
+	const { selectBlock } = useDispatch( blockEditorStore );
+	const { hasBlockSelection } = useSelect(
+		( select ) => ( {
+			hasBlockSelection:
+				!! select( blockEditorStore ).getBlockSelectionStart(),
+		} ),
+		[]
+	);
 
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );
 	const headerFocusReturnRef = useFocusReturn();
 	const contentFocusReturnRef = useFocusReturn();
 
 	function closeOnEscape( event ) {
+		// If there is a block selection, then skip closing the list view
+		// and clear out the block selection instead.
+		if (
+			event.keyCode === ESCAPE &&
+			! event.defaultPrevented &&
+			hasBlockSelection
+		) {
+			event.preventDefault();
+			selectBlock();
+			return;
+		}
+
 		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
 			event.preventDefault();
 			setIsListViewOpened( false );

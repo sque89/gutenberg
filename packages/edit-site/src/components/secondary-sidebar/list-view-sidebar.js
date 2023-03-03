@@ -1,7 +1,10 @@
 /**
  * WordPress dependencies
  */
-import { __experimentalListView as ListView } from '@wordpress/block-editor';
+import {
+	__experimentalListView as ListView,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import {
 	useFocusOnMount,
@@ -9,7 +12,7 @@ import {
 	useInstanceId,
 	useMergeRefs,
 } from '@wordpress/compose';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { ESCAPE } from '@wordpress/keycodes';
@@ -21,11 +24,30 @@ import { store as editSiteStore } from '../../store';
 
 export default function ListViewSidebar() {
 	const { setIsListViewOpened } = useDispatch( editSiteStore );
+	const { selectBlock } = useDispatch( blockEditorStore );
+	const { hasBlockSelection } = useSelect(
+		( select ) => ( {
+			hasBlockSelection:
+				!! select( blockEditorStore ).getBlockSelectionStart(),
+		} ),
+		[]
+	);
 
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );
 	const headerFocusReturnRef = useFocusReturn();
 	const contentFocusReturnRef = useFocusReturn();
+
 	function closeOnEscape( event ) {
+		if (
+			event.keyCode === ESCAPE &&
+			! event.defaultPrevented &&
+			hasBlockSelection
+		) {
+			event.preventDefault();
+			selectBlock();
+			return;
+		}
+
 		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
 			setIsListViewOpened( false );
 		}
