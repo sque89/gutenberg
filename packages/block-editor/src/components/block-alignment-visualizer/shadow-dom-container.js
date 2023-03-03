@@ -8,7 +8,6 @@ export default function ShadowDOMContainer( { children } ) {
 	const [ shadowRoot, setShadowRoot ] = useState( null );
 	const ref = useRefEffect( ( node ) => {
 		setShadowRoot( node.attachShadow( { mode: 'open' } ) );
-
 		return () => setShadowRoot( null );
 	}, [] );
 

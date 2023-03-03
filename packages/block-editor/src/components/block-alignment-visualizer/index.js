@@ -16,6 +16,7 @@ import { __unstableUseBlockElement as useBlockElement } from '../block-list/use-
 import useAvailableAlignments from '../block-alignment-control/use-available-alignments';
 import { store as blockEditorStore } from '../../store';
 import { getValidAlignments } from '../../hooks/align';
+import Visualization from './visualization';
 
 /**
  * A component that displays block alignment guidelines.
@@ -93,6 +94,11 @@ export default function BlockAlignmentVisualizer( {
 					selector=".block-editor-alignment-visualizer-guide__layout"
 				/>
 				<style>{ guideIframeStyles }</style>
+				<Visualization
+					alignments={ availableAlignments }
+					contentSize={ layout.contentSize }
+					wideSize={ layout.wideSize }
+				/>
 				<div className="editor-styles-wrapper">
 					{ availableAlignments.map( ( { name } ) => (
 						<BlockAlignmentVisualizerGuide
