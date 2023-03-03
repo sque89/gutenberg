@@ -48,9 +48,6 @@ export const guideIframeStyles = `
 	height: 100%;
 	max-width: 100%;
 	margin: 0 auto;
-	opacity: 0.7;
-	border-left: solid 2px black;
-	border-right: solid 2px black;
 }
 `;
 
