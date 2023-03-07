@@ -178,7 +178,7 @@ const DimensionControls = ( {
 					units={ units }
 				/>
 			</ToolsPanelItem>
-			{ ( height || aspectRatio ) && (
+			{ ( height || ( aspectRatio && aspectRatio !== 'auto' ) ) && (
 				<ToolsPanelItem
 					hasValue={ () => !! scale && scale !== DEFAULT_SCALE }
 					label={ scaleLabel }
