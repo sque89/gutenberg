@@ -45,7 +45,7 @@ const LineHeightControl = ( {
 			case '0': {
 				// This means the user explicitly input '0', rather than stepped down
 				// from an undefined value state.
-				if ( wasTypedOrPasted ) return nextValue;
+				if ( wasTypedOrPasted ) return parseInt( nextValue, 10 );
 				// Decrement by step value.
 				return BASE_DEFAULT_VALUE - STEP;
 			}
