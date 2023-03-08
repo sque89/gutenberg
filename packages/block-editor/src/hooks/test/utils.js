@@ -7,7 +7,7 @@ import { applyFilters } from '@wordpress/hooks';
  * Internal dependencies
  */
 import '../anchor';
-import { immutableSet } from '../utils';
+import { cleanEmptyObject, immutableSet } from '../utils';
 
 const noop = () => {};
 
@@ -212,6 +212,55 @@ describe( 'anchor', () => {
 			);
 
 			expect( extraProps.id ).toBe( null );
+		} );
+	} );
+} );
+
+describe( 'cleanEmptyObject', () => {
+	it( 'filters all falsy values', () => {
+		const input = {
+			foo: {
+				bar: undefined,
+			},
+			bar: [],
+			baz: false,
+			zero: 0,
+			test: undefined,
+			present: true,
+		};
+		expect( cleanEmptyObject( input ) ).toEqual( {
+			bar: [],
+			present: true,
+		} );
+	} );
+
+	it( 'filters falsy values and returns undefined if result empty', () => {
+		const input = {
+			foo: {
+				bar: undefined,
+			},
+			baz: false,
+			zero: 0,
+			test: undefined,
+		};
+		expect( cleanEmptyObject( input ) ).toBe( undefined );
+	} );
+
+	it( 'does not filter zero values when they are allowed', () => {
+		const input = {
+			foo: {
+				bar: undefined,
+				zero: 0,
+			},
+			baz: false,
+			zero: 0,
+			test: undefined,
+		};
+		expect( cleanEmptyObject( input, { allowZeros: true } ) ).toEqual( {
+			foo: {
+				zero: 0,
+			},
+			zero: 0,
 		} );
 	} );
 } );

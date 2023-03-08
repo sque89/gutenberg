@@ -16,12 +16,16 @@ import { useSetting } from '../components';
 import { useSettingsForBlockElement } from '../components/global-styles/hooks';
 
 /**
- * Removed falsy values from nested object.
+ * Removed falsy values from nested object. If `allowZeros` is `true`, then
+ * zero values will be allowed within the resulting object.
  *
- * @param {*} object
+ * @param {*}       object             Object to be cleaned.
+ * @param {Object}  options            Options config.
+ * @param {boolean} options.allowZeros Whether to allow zero values.
+ *
  * @return {*} Object cleaned from falsy values
  */
-export const cleanEmptyObject = ( object ) => {
+export const cleanEmptyObject = ( object, { allowZeros } = {} ) => {
 	if (
 		object === null ||
 		typeof object !== 'object' ||
@@ -29,9 +33,11 @@ export const cleanEmptyObject = ( object ) => {
 	) {
 		return object;
 	}
+	const recursiveCleanObject = ( nestedObject ) =>
+		cleanEmptyObject( nestedObject, { allowZeros } );
 	const cleanedNestedObjects = Object.fromEntries(
-		Object.entries( mapValues( object, cleanEmptyObject ) ).filter(
-			( [ , value ] ) => Boolean( value )
+		Object.entries( mapValues( object, recursiveCleanObject ) ).filter(
+			( [ , value ] ) => Boolean( value ) || ( allowZeros && value === 0 )
 		)
 	);
 	return isEmpty( cleanedNestedObjects ) ? undefined : cleanedNestedObjects;
