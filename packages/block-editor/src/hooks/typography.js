@@ -60,7 +60,7 @@ function styleToAttributes( style ) {
 		fontSize: fontSizeSlug ? undefined : fontSizeValue,
 	};
 	return {
-		style: cleanEmptyObject( updatedStyle ),
+		style: cleanEmptyObject( updatedStyle, { allowZeros: true } ),
 		fontFamily: fontFamilySlug,
 		fontSize: fontSizeSlug,
 	};
