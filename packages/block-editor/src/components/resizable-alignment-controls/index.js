@@ -6,7 +6,6 @@ import {
 	__unstableAnimatePresence as AnimatePresence,
 	__unstableMotion as motion,
 } from '@wordpress/components';
-import { throttle } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import { useMemo, useRef, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
@@ -17,10 +16,9 @@ import { isRTL } from '@wordpress/i18n';
 import BlockAlignmentVisualizer from '../block-alignment-visualizer';
 import {
 	BlockAlignmentGuideContextProvider,
-	useBlockAlignmentGuides,
+	useDetectSnapping,
 } from '../block-alignment-visualizer/guide-context';
 import { store as blockEditorStore } from '../../store';
-import { getDistanceFromPointToEdge } from '../../utils/math';
 
 const SNAP_GAP = 30;
 
@@ -81,50 +79,6 @@ function getOffsetRect( element, rect ) {
 }
 
 /**
- * Detect the alignment guide that is currently closest to the `point`.
- *
- * @param {Node}           resizableElement The element being resized.
- * @param {'left'|'right'} resizeDirection  The direction being resized.
- * @param {Map}            alignmentGuides  A Map of alignment guide nodes.
- *
- * @return {null|'none'|'wide'|'full'} The alignment guide or `null` if no snapping was detected.
- */
-function detectSnapping( resizableElement, resizeDirection, alignmentGuides ) {
-	const resizableRect = getOffsetRect( resizableElement );
-
-	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
-	// - Caveat: this assumes horizontal resizing.
-	const pointFromResizableRectEdge = {
-		x: resizableRect[ resizeDirection ],
-		y: resizableRect.top,
-	};
-
-	let candidateZone = null;
-
-	// Loop through alignment zone nodes.
-	alignmentGuides?.forEach( ( zone, name ) => {
-		const zoneRect = getOffsetRect( zone );
-
-		// Calculate the distance from the resizeable element's edge to the
-		// alignment zone's edge.
-		const distance = getDistanceFromPointToEdge(
-			pointFromResizableRectEdge,
-			zoneRect,
-			resizeDirection
-		);
-
-		// If the distance is within snapping tolerance, we are snapping to this alignment.
-		if ( distance < SNAP_GAP ) {
-			candidateZone = name;
-		}
-	} );
-
-	return candidateZone;
-}
-
-const throttledDetectSnapping = throttle( detectSnapping, 100 );
-
-/**
  * A component that composes together the `ResizebleBox` and `BlockAlignmentVisualizer`
  * and configures snapping to block alignments.
  *
@@ -159,10 +113,10 @@ function ResizableAlignmentControls( {
 	size,
 } ) {
 	const resizableRef = useRef();
+	const detectSnapping = useDetectSnapping( SNAP_GAP );
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
 	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
-	const alignmentGuides = useBlockAlignmentGuides();
 
 	const rootClientId = useSelect(
 		( select ) =>
@@ -176,18 +130,16 @@ function ResizableAlignmentControls( {
 			return { width: '100%' };
 		}
 
-		// Calculate the correct positioning to overlay the element over the alignment zone when snapping.
-		const snappedZone = alignmentGuides.get( snappedAlignment );
-		const zoneRect = getOffsetRect( snappedZone );
 		const contentRect = getOffsetRect( resizableRef.current );
+		const alignmentRect = snappedAlignment.rect;
 
 		return {
 			position: 'absolute',
-			left: zoneRect.left - contentRect.left,
-			top: zoneRect.top - contentRect.top,
-			width: zoneRect.width,
+			left: alignmentRect.left - contentRect.left,
+			top: alignmentRect.top - contentRect.top,
+			width: alignmentRect.width,
 		};
-	}, [ snappedAlignment, alignmentGuides ] );
+	}, [ snappedAlignment ] );
 
 	return (
 		<>
@@ -234,12 +186,13 @@ function ResizableAlignmentControls( {
 				} }
 				onResize={ ( event, resizeDirection, resizableElement ) => {
 					// Detect if snapping is happening.
-					const newSnappedAlignment = throttledDetectSnapping(
+					const newSnappedAlignment = detectSnapping(
 						resizableElement,
-						resizeDirection,
-						alignmentGuides
+						resizeDirection
 					);
-					if ( newSnappedAlignment !== snappedAlignment ) {
+					if (
+						newSnappedAlignment?.name !== snappedAlignment?.name
+					) {
 						setSnappedAlignment( newSnappedAlignment );
 					}
 				} }
