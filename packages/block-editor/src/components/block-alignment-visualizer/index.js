@@ -98,6 +98,7 @@ export default function BlockAlignmentVisualizer( {
 					alignments={ availableAlignments }
 					contentSize={ layout.contentSize }
 					wideSize={ layout.wideSize }
+					justification={ layout.justifyContent }
 				/>
 				<div className="editor-styles-wrapper">
 					{ availableAlignments.map( ( { name } ) => (

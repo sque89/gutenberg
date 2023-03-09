@@ -1,4 +1,14 @@
-export default function Visualization( { contentSize, wideSize, alignments } ) {
+/**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+export default function Visualization( {
+	contentSize,
+	wideSize,
+	alignments,
+	justification,
+} ) {
 	return (
 		<>
 			<style>
@@ -17,6 +27,16 @@ export default function Visualization( { contentSize, wideSize, alignments } ) {
 						grid-template-columns: 1fr var(--wide-segment-width) var(--content-size) var(--wide-segment-width) 1fr;
 					}
 
+					.block-editor-alignment-visualizer__visualization.is-content-justification-right {
+						--wide-segment-width: calc( ((var(--wide-size) - var(--content-size))) - var(--gap) );
+						grid-template-columns: 1fr var(--wide-segment-width) var(--content-size);
+					}
+
+					.block-editor-alignment-visualizer__visualization.is-content-justification-left {
+						--wide-segment-width: calc( ((var(--wide-size) - var(--content-size))) - var(--gap) );
+						grid-template-columns: var(--content-size) var(--wide-segment-width) 1fr;
+					}
+
 					.block-editor-alignment-visualizer__visualization-segment {
 						background: #3d5af2;
 						opacity: 0.2;
@@ -24,30 +44,40 @@ export default function Visualization( { contentSize, wideSize, alignments } ) {
 					}
 				` }
 			</style>
-			<div className="block-editor-alignment-visualizer__visualization">
-				{ [ ...alignments ]
-					.reverse()
-					.map(
-						( { name } ) =>
-							( name === 'full' || name === 'wide' ) && (
-								<div
-									key={ `${ name }-left` }
-									className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width left` }
-								/>
-							)
-					) }
+			<div
+				className={ classnames(
+					'block-editor-alignment-visualizer__visualization',
+					{
+						[ `is-content-justification-${ justification }` ]:
+							justification,
+					}
+				) }
+			>
+				{ justification !== 'left' &&
+					[ ...alignments ]
+						.reverse()
+						.map(
+							( { name } ) =>
+								( name === 'full' || name === 'wide' ) && (
+									<div
+										key={ `${ name }-left` }
+										className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width left` }
+									/>
+								)
+						) }
 				<div
 					className={ `block-editor-alignment-visualizer__visualization-segment content` }
 				/>
-				{ alignments.map(
-					( { name } ) =>
-						( name === 'full' || name === 'wide' ) && (
-							<div
-								key={ `${ name }-right` }
-								className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width right` }
-							/>
-						)
-				) }
+				{ justification !== 'right' &&
+					alignments.map(
+						( { name } ) =>
+							( name === 'full' || name === 'wide' ) && (
+								<div
+									key={ `${ name }-right` }
+									className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width right` }
+								/>
+							)
+					) }
 			</div>
 		</>
 	);
