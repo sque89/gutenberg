@@ -3,6 +3,15 @@
  */
 import classnames from 'classnames';
 
+/**
+ * Renders a visualization of block alignments.
+ *
+ * @param {Object}                  props
+ * @param {string}                  props.contentSize   The CSS value for content size (e.g. 600px).
+ * @param {string}                  props.wideSize      The CSS value for wide size (e.g. 80%).
+ * @param {'none'|'wide'|'full'[]}  props.alignments    An array of the alignments to render.
+ * @param {'left'|'right'|'center'} props.justification The justification.
+ */
 export default function Visualization( {
 	contentSize,
 	wideSize,
@@ -28,12 +37,12 @@ export default function Visualization( {
 					}
 
 					.block-editor-alignment-visualizer__visualization.is-content-justification-right {
-						--wide-segment-width: calc( ((var(--wide-size) - var(--content-size))) - var(--gap) );
+						--wide-segment-width: calc( (var(--wide-size) - var(--content-size)) - var(--gap) );
 						grid-template-columns: 1fr var(--wide-segment-width) var(--content-size);
 					}
 
 					.block-editor-alignment-visualizer__visualization.is-content-justification-left {
-						--wide-segment-width: calc( ((var(--wide-size) - var(--content-size))) - var(--gap) );
+						--wide-segment-width: calc( (var(--wide-size) - var(--content-size)) - var(--gap) );
 						grid-template-columns: var(--content-size) var(--wide-segment-width) 1fr;
 					}
 
@@ -61,12 +70,12 @@ export default function Visualization( {
 								( name === 'full' || name === 'wide' ) && (
 									<div
 										key={ `${ name }-left` }
-										className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width left` }
+										className={ `block-editor-alignment-visualizer__visualization-segment` }
 									/>
 								)
 						) }
 				<div
-					className={ `block-editor-alignment-visualizer__visualization-segment content` }
+					className={ `block-editor-alignment-visualizer__visualization-segment` }
 				/>
 				{ justification !== 'right' &&
 					alignments.map(
@@ -74,7 +83,7 @@ export default function Visualization( {
 							( name === 'full' || name === 'wide' ) && (
 								<div
 									key={ `${ name }-right` }
-									className={ `block-editor-alignment-visualizer__visualization-segment ${ name }-width right` }
+									className={ `block-editor-alignment-visualizer__visualization-segment` }
 								/>
 							)
 					) }
