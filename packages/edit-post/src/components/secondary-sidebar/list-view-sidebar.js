@@ -49,6 +49,13 @@ export default function ListViewSidebar() {
 	const [ tab, setTab ] = useState( 'list-view' );
 
 	function closeOnEscape( event ) {
+		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
+			event.preventDefault();
+			setIsListViewOpened( false );
+		}
+	}
+
+	function clearSelectionOnEscape( event ) {
 		// If there is a block selection, then skip closing the list view
 		// and clear out the block selection instead.
 		if (
@@ -60,12 +67,6 @@ export default function ListViewSidebar() {
 			event.preventDefault();
 			clearSelectedBlock();
 			speak( __( 'All blocks deselected.' ), 'assertive' );
-			return;
-		}
-
-		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
-			event.preventDefault();
-			setIsListViewOpened( false );
 		}
 	}
 
@@ -178,7 +179,11 @@ export default function ListViewSidebar() {
 				className="edit-post-editor__list-view-container"
 			>
 				{ tab === 'list-view' && (
-					<div className="edit-post-editor__list-view-panel-content">
+					// eslint-disable-next-line jsx-a11y/no-static-element-interactions
+					<div
+						className="edit-post-editor__list-view-panel-content"
+						onKeyDown={ clearSelectionOnEscape }
+					>
 						<ListView />
 					</div>
 				) }
