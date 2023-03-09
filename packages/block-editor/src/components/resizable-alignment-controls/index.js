@@ -7,6 +7,7 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { getScreenRect } from '@wordpress/dom';
 import { useMemo, useRef, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
 
@@ -44,38 +45,6 @@ function getVisibleHandles( alignment ) {
 		return { left: true, right: false, bottom: true, top: false };
 	}
 	return { right: true, left: false, bottom: true, top: false };
-}
-
-/**
- * Offset an element by any parent iframes to get its true rect.
- *
- * @param {Element}  element The dom element to return the rect.
- * @param {?DOMRect} rect    The rect to offset. Only use if you already have `element`'s rect,
- *                           this will save a call to `getBoundingClientRect`.
- *
- * @return {DOMRect} The rect offset by any parent iframes.
- */
-function getOffsetRect( element, rect ) {
-	const frame = element?.ownerDocument?.defaultView?.frameElement;
-
-	// Return early when there's no parent iframe.
-	if ( ! frame ) {
-		return rect ?? element.getBoundingClientRect();
-	}
-
-	const frameRect = frame?.getBoundingClientRect();
-	rect = rect ?? element?.getBoundingClientRect();
-
-	const offsetRect = new window.DOMRect(
-		rect.x + ( frameRect?.left ?? 0 ),
-		rect.y + ( frameRect?.top ?? 0 ),
-		rect.width,
-		rect.height
-	);
-
-	// Perform a tail recursion and continue offsetting
-	// by the next parent iframe.
-	return getOffsetRect( frame, offsetRect );
 }
 
 /**
@@ -130,7 +99,7 @@ function ResizableAlignmentControls( {
 			return { width: '100%' };
 		}
 
-		const contentRect = getOffsetRect( resizableRef.current );
+		const contentRect = getScreenRect( resizableRef.current );
 		const alignmentRect = snappedAlignment.rect;
 
 		return {

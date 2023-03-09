@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useThrottle } from '@wordpress/compose';
+import { getScreenRect } from '@wordpress/dom';
 import { createContext, useContext, useRef } from '@wordpress/element';
 
 /**
@@ -24,38 +25,6 @@ export function BlockAlignmentGuideContextProvider( { children } ) {
 }
 
 /**
- * Offset an element by any parent iframes to get its true rect.
- *
- * @param {Element}  element The dom element to return the rect.
- * @param {?DOMRect} rect    The rect to offset. Only use if you already have `element`'s rect,
- *                           this will save a call to `getBoundingClientRect`.
- *
- * @return {DOMRect} The rect offset by any parent iframes.
- */
-function getOffsetRect( element, rect ) {
-	const frame = element?.ownerDocument?.defaultView?.frameElement;
-
-	// Return early when there's no parent iframe.
-	if ( ! frame ) {
-		return rect ?? element.getBoundingClientRect();
-	}
-
-	const frameRect = frame?.getBoundingClientRect();
-	rect = rect ?? element?.getBoundingClientRect();
-
-	const offsetRect = new window.DOMRect(
-		rect.x + ( frameRect?.left ?? 0 ),
-		rect.y + ( frameRect?.top ?? 0 ),
-		rect.width,
-		rect.height
-	);
-
-	// Perform a tail recursion and continue offsetting
-	// by the next parent iframe.
-	return getOffsetRect( frame, offsetRect );
-}
-
-/**
  * Detect whether the `element` is snapping to one of the alignment guide along its `snapEdge`.
  *
  * @param {Node}           element         The element to check for snapping.
@@ -66,7 +35,7 @@ function getOffsetRect( element, rect ) {
  * @return {null|'none'|'wide'|'full'} The alignment guide or `null` if no snapping was detected.
  */
 function detectSnapping( element, snapEdge, alignmentGuides, snapGap ) {
-	const elementRect = getOffsetRect( element );
+	const elementRect = getScreenRect( element );
 
 	// Get a point on the resizable rect's edge for `getDistanceFromPointToEdge`.
 	// - Caveat: this assumes horizontal resizing.
@@ -79,7 +48,7 @@ function detectSnapping( element, snapEdge, alignmentGuides, snapGap ) {
 
 	// Loop through alignment guide nodes.
 	alignmentGuides?.forEach( ( guide, name ) => {
-		const guideRect = getOffsetRect( guide );
+		const guideRect = getScreenRect( guide );
 
 		// Calculate the distance from the resizeable element's edge to the
 		// alignment zone's edge.
@@ -115,7 +84,7 @@ export function useDetectSnapping( snapGap ) {
 
 		return {
 			name: snappedAlignment,
-			rect: getOffsetRect( guide ),
+			rect: getScreenRect( guide ),
 		};
 	}, 100 );
 }
