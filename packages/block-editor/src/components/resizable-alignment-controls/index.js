@@ -167,7 +167,7 @@ function ResizableAlignmentControls( {
 				} }
 				onResizeStop={ ( ...resizeArgs ) => {
 					if ( onSnap && snappedAlignment ) {
-						onSnap( snappedAlignment );
+						onSnap( snappedAlignment?.name );
 					} else {
 						onResizeStop( ...resizeArgs );
 					}
