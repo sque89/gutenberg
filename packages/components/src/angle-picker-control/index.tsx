@@ -8,7 +8,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import deprecated from '@wordpress/deprecated';
-import { forwardRef } from '@wordpress/element';
+import { forwardRef, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -63,6 +63,8 @@ function UnforwardedAnglePickerControl(
 
 	const classes = classnames( 'components-angle-picker-control', className );
 
+	const refNumberInput = useRef();
+
 	return (
 		<Root
 			{ ...restProps }
@@ -71,6 +73,7 @@ function UnforwardedAnglePickerControl(
 			className={ classes }
 		>
 			<NumberControl
+				ref={ refNumberInput }
 				label={ label }
 				className="components-angle-picker-control__input-field"
 				max={ 360 }
@@ -93,6 +96,7 @@ function UnforwardedAnglePickerControl(
 							°
 						</Spacer>
 						<AngleCircle
+							refNumberInput={ refNumberInput }
 							aria-hidden="true"
 							value={ value }
 							onChange={ onChange }

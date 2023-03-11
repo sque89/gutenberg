@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import type { MutableRefObject } from 'react';
+
 export type AnglePickerControlProps = {
 	/**
 	 * Start opting into the new margin-free styles that will become the default
@@ -23,7 +28,9 @@ export type AnglePickerControlProps = {
 	value: number | string;
 };
 
-export type AngleCircleProps = Pick<
-	AnglePickerControlProps,
-	'value' | 'onChange'
->;
+export type AngleCircleProps = {
+	/**
+	 * Ref to the number input.
+	 */
+	refNumberInput: MutableRefObject< HTMLInputElement | undefined >;
+} & Pick< AnglePickerControlProps, 'value' | 'onChange' >;
