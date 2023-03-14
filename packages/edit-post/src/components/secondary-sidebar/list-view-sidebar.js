@@ -18,7 +18,7 @@ import {
 } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { focus } from '@wordpress/dom';
-import { useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { speak } from '@wordpress/a11y';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
@@ -33,11 +33,13 @@ import ListViewOutline from './list-view-outline';
 
 export default function ListViewSidebar() {
 	const { setIsListViewOpened } = useDispatch( editPostStore );
-	const { clearSelectedBlock } = useDispatch( blockEditorStore );
-	const { hasBlockSelection } = useSelect(
+	const { clearSelectedBlock, selectBlock } = useDispatch( blockEditorStore );
+	const { hasBlockSelection, selectedBlockClientIds } = useSelect(
 		( select ) => ( {
 			hasBlockSelection:
 				!! select( blockEditorStore ).getBlockSelectionStart(),
+			selectedBlockClientIds:
+				select( blockEditorStore ).getSelectedBlockClientIds(),
 		} ),
 		[]
 	);
@@ -47,11 +49,24 @@ export default function ListViewSidebar() {
 	const contentFocusReturnRef = useFocusReturn();
 
 	const [ tab, setTab ] = useState( 'list-view' );
+	const [ lastSelectedBlock, setLastSelectedBlock ] = useState();
+
+	useEffect( () => {
+		if ( selectedBlockClientIds?.length === 1 ) {
+			setLastSelectedBlock( selectedBlockClientIds[ 0 ] );
+		}
+	}, [] );
 
 	function closeOnEscape( event ) {
 		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
 			event.preventDefault();
 			setIsListViewOpened( false );
+
+			// If there is no longer a block selection, but a single block was selected
+			// before opening the list view, then select that block again.
+			if ( ! hasBlockSelection && lastSelectedBlock ) {
+				selectBlock( lastSelectedBlock );
+			}
 		}
 	}
 
@@ -114,8 +129,14 @@ export default function ListViewSidebar() {
 			)
 		) {
 			setIsListViewOpened( false );
-			// If the list view or outline does not have focus, focus should be moved to it.
+
+			// If there is no longer a block selection, but a single block was selected
+			// before opening the list view, then select that block again.
+			if ( ! hasBlockSelection && lastSelectedBlock ) {
+				selectBlock( lastSelectedBlock );
+			}
 		} else {
+			// If the list view or outline does not have focus, focus should be moved to it.
 			handleSidebarFocus( tab );
 		}
 	} );
