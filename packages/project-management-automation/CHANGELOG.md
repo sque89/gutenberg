@@ -4,7 +4,7 @@
 
 ### Breaking Changes
 
--   Increase the minimum Node.js version to 18 ([#48950](https://github.com/WordPress/gutenberg/pull/48950)).
+-   Use Node.js v16 in the action runner ([#48950](https://github.com/WordPress/gutenberg/pull/48950)).
 
 ## 1.27.0 (2023-03-01)
 
