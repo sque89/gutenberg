@@ -6,7 +6,7 @@ import {
 	__unstableAnimatePresence as AnimatePresence,
 	__unstableMotion as motion,
 } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { getScreenRect } from '@wordpress/dom';
 import { useMemo, useRef, useState } from '@wordpress/element';
 import { isRTL } from '@wordpress/i18n';
@@ -20,6 +20,7 @@ import {
 	useDetectSnapping,
 } from '../block-alignment-visualizer/guide-context';
 import { store as blockEditorStore } from '../../store';
+import { unlock } from '../../lock-unlock';
 
 const SNAP_GAP = 30;
 
@@ -86,6 +87,9 @@ function ResizableAlignmentControls( {
 	const [ isAlignmentVisualizerVisible, setIsAlignmentVisualizerVisible ] =
 		useState( false );
 	const [ snappedAlignment, setSnappedAlignment ] = useState( null );
+	const { hideBlockInterface, showBlockInterface } = unlock(
+		useDispatch( blockEditorStore )
+	);
 
 	const rootClientId = useSelect(
 		( select ) =>
@@ -145,6 +149,7 @@ function ResizableAlignmentControls( {
 					// The 'ref' prop on the `ResizableBox` component is used to expose the re-resizable API.
 					// This seems to be the only way to get a ref to the element.
 					resizableRef.current = resizeElement;
+					hideBlockInterface();
 
 					if (
 						resizeDirection === 'right' ||
@@ -172,6 +177,7 @@ function ResizableAlignmentControls( {
 						onResizeStop( ...resizeArgs );
 					}
 					setIsAlignmentVisualizerVisible( false );
+					showBlockInterface();
 					setSnappedAlignment( null );
 				} }
 				resizeRatio={ currentAlignment === 'center' ? 2 : 1 }
