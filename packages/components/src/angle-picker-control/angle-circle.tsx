@@ -17,10 +17,9 @@ import type { WordPressComponentProps } from '../ui/context';
 import type { AngleCircleProps } from './types';
 
 type UseDraggingArgumentType = Parameters< typeof useDragging >[ 0 ];
-type UseDraggingCallbackEvent =
+type UseDraggingEventWithMovement =
 	| Parameters< UseDraggingArgumentType[ 'onDragStart' ] >[ 0 ]
-	| Parameters< UseDraggingArgumentType[ 'onDragMove' ] >[ 0 ]
-	| Parameters< UseDraggingArgumentType[ 'onDragEnd' ] >[ 0 ];
+	| Parameters< UseDraggingArgumentType[ 'onDragMove' ] >[ 0 ];
 
 function AngleCircle( {
 	value,
@@ -44,10 +43,7 @@ function AngleCircle( {
 		};
 	};
 
-	const changeAngleToPosition = ( event: UseDraggingCallbackEvent ) => {
-		if ( event === undefined ) {
-			return;
-		}
+	const changeAngleToPosition = ( event: UseDraggingEventWithMovement ) => {
 		if (
 			angleCircleCenter.current !== undefined &&
 			onChange !== undefined
@@ -69,7 +65,7 @@ function AngleCircle( {
 			changeAngleToPosition( event );
 		},
 		onDragMove: changeAngleToPosition,
-		onDragEnd: changeAngleToPosition,
+		onDragEnd: () => {}, // TODO update useDragging typing so this is optional and remove.
 	} );
 
 	useEffect( () => {
