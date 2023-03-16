@@ -48,11 +48,6 @@ function AngleCircle( {
 		if ( event === undefined ) {
 			return;
 		}
-
-		// Prevent (drag) mouse events from selecting and accidentally
-		// triggering actions from other elements.
-		event.preventDefault();
-
 		if (
 			angleCircleCenter.current !== undefined &&
 			onChange !== undefined
@@ -66,6 +61,9 @@ function AngleCircle( {
 
 	const { startDrag, isDragging } = useDragging( {
 		onDragStart: ( event ) => {
+			// Prevent (drag) mouse events from selecting and accidentally
+			// triggering actions from other elements.
+			event.preventDefault();
 			refNumberInput.current?.focus();
 			setAngleCircleCenter();
 			changeAngleToPosition( event );
