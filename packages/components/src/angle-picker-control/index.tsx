@@ -14,6 +14,8 @@ import { isRTL, __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { FlexBlock } from '../flex';
+import { Spacer } from '../spacer';
 import NumberControl from '../number-control';
 import AngleCircle from './angle-circle';
 import { Root, UnitText } from './styles/angle-picker-control-styles';
@@ -72,31 +74,32 @@ function UnforwardedAnglePickerControl(
 			ref={ ref }
 			__nextHasNoMarginBottom={ __nextHasNoMarginBottom }
 			className={ classes }
+			gap={ 2 }
 		>
-			<NumberControl
-				ref={ refNumberInput }
-				label={ label }
-				className="components-angle-picker-control__input-field"
-				max={ 360 }
-				min={ 0 }
-				onChange={ handleOnNumberChange }
-				size="__unstable-large"
-				step="1"
-				value={ value }
-				spinControls="none"
-				prefix={ prefixedUnitText }
-				suffix={
-					<>
-						{ suffixedUnitText }
-						<AngleCircle
-							refNumberInput={ refNumberInput }
-							aria-hidden="true"
-							value={ value }
-							onChange={ onChange }
-						/>
-					</>
-				}
-			/>
+			<FlexBlock>
+				<NumberControl
+					ref={ refNumberInput }
+					label={ label }
+					className="components-angle-picker-control__input-field"
+					max={ 360 }
+					min={ 0 }
+					onChange={ handleOnNumberChange }
+					size="__unstable-large"
+					step="1"
+					value={ value }
+					spinControls="none"
+					prefix={ prefixedUnitText }
+					suffix={ suffixedUnitText }
+				/>
+			</FlexBlock>
+			<Spacer marginBottom="1" marginTop="auto">
+				<AngleCircle
+					refNumberInput={ refNumberInput }
+					aria-hidden="true"
+					value={ value }
+					onChange={ onChange }
+				/>
+			</Spacer>
 		</Root>
 	);
 }
