@@ -14,6 +14,7 @@ import {
 import { forwardRef } from '@wordpress/element';
 import { Icon, lockSmall as lock } from '@wordpress/icons';
 import { SPACE, ENTER } from '@wordpress/keycodes';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -44,6 +45,14 @@ function ListViewBlockSelectButton(
 		context: 'list-view',
 	} );
 	const { isLocked } = useBlockLock( clientId );
+	const displayTitle = blockInformation?.positionLabel
+		? sprintf(
+				// translators: 1: Title of block (i.e. Group, Heading, etc), 2: Position of selected block, e.g. "Sticky" or "Fixed".
+				__( '%1$s (%2$s)' ),
+				blockTitle,
+				blockInformation.positionLabel
+		  )
+		: blockTitle;
 
 	// The `href` attribute triggers the browser's native HTML drag operations.
 	// When the link is dragged, the element's outerHTML is set in DataTransfer object as text/html.
@@ -87,7 +96,9 @@ function ListViewBlockSelectButton(
 					spacing={ 1 }
 				>
 					<span className="block-editor-list-view-block-select-button__title">
-						<Truncate ellipsizeMode="auto">{ blockTitle }</Truncate>
+						<Truncate ellipsizeMode="auto">
+							{ displayTitle }
+						</Truncate>
 					</span>
 					{ blockInformation?.anchor && (
 						<span className="block-editor-list-view-block-select-button__anchor-wrapper">
